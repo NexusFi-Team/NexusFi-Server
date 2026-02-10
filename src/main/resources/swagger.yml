@@ -16,7 +16,7 @@ springdoc:
 spring:
   config:
     activate:
-      on-profile: prod
+      on-profile: prd
 springdoc:
   api-docs:
     enabled: false

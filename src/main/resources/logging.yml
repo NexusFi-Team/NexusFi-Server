@@ -1,6 +1,13 @@
 logging:
   level:
     com.nexusfi.server: info
+
+decorator:
+  datasource:
+    p6spy:
+      enable-logging: true
+      logging: slf4j
+
 ---
 spring:
   config:
@@ -11,6 +18,7 @@ logging:
     com.nexusfi.server: debug
     org.hibernate.SQL: debug
     org.hibernate.type.descriptor.sql.BasicBinder: trace
+    p6spy: info
 
 ---
 spring:
@@ -22,12 +30,17 @@ logging:
     com.nexusfi.server: debug
     org.hibernate.SQL: debug
     org.hibernate.type.descriptor.sql.BasicBinder: trace
+    p6spy: info
 
 ---
 spring:
   config:
     activate:
       on-profile: prd
+decorator:
+  datasource:
+    p6spy:
+      enable-logging: false
 logging:
   level:
     com.nexusfi.server: info

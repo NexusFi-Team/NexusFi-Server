@@ -44,6 +44,7 @@ dependencies {
     // 코틀린 및 JSON 처리
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
+    annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
     
     // QueryDSL (Jakarta 기반)
     implementation("com.querydsl:querydsl-jpa:5.1.0:jakarta")
@@ -51,6 +52,7 @@ dependencies {
     
     // 데이터베이스 드라이버
     runtimeOnly("org.postgresql:postgresql")
+    implementation("com.github.gavlyukovskiy:p6spy-spring-boot-starter:1.9.2")
     
     // 테스트 도구
     testImplementation("org.springframework.boot:spring-boot-starter-test")

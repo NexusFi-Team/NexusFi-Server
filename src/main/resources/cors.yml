@@ -7,7 +7,7 @@ cors:
   allowed-origins: "https://dev.nexusfi.com"
 
 ---
-spring.config.activate.on-profile: prod
+spring.config.activate.on-profile: prd
 
 cors:
   allowed-origins: "https://nexusfi.com"
