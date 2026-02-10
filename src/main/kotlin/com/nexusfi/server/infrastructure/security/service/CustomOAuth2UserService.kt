@@ -28,7 +28,7 @@ class CustomOAuth2UserService(
         val registrationId = userRequest.clientRegistration.registrationId
         val socialType = getSocialType(registrationId)
         
-        // OAuth2 로그인 진행 시 키가 되는 필드값 (Primary Key와 유사)
+        // OAuth2 로그인 진행 시 키가 되는 필드값
         val userNameAttributeName = userRequest.clientRegistration.providerDetails.userInfoEndpoint.userNameAttributeName
         
         // 소셜 유저 정보 파싱
@@ -56,8 +56,8 @@ class CustomOAuth2UserService(
     // 유저 정보 저장 또는 업데이트 로직
     private fun saveOrUpdate(socialType: SocialType, attributes: OAuth2Attributes): User {
         val user = userRepository.findBySocialTypeAndSocialId(socialType, attributes.oauth2UserInfo.getId())
-            .map { it.updateProfile(attributes.oauth2UserInfo.getNickname(), null, null); it } // 기존 유저는 닉네임만 업데이트 시도
-            .orElseGet { attributes.toEntity(socialType, attributes.oauth2UserInfo) } // 신규 유저는 엔티티 생성
+            .map { it.updateProfile(attributes.oauth2UserInfo.getNickname()) } // 기존 유저는 정보 업데이트
+            .orElseGet { attributes.toEntity(socialType, attributes.oauth2UserInfo) } // 신규 유저는 가입
 
         return userRepository.save(user)
     }

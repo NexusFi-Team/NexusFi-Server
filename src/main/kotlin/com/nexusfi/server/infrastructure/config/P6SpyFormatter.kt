@@ -6,8 +6,10 @@ import org.hibernate.engine.jdbc.internal.FormatStyle
 import org.springframework.stereotype.Component
 import java.util.*
 
+// P6Spy SQL 로그 포맷팅 설정
 @Component
 class P6SpyFormatter : MessageFormattingStrategy {
+    // 로그 메시지 포맷 정의
     override fun formatMessage(
         connectionId: Int,
         now: String?,
