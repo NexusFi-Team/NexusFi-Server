@@ -82,9 +82,12 @@ class KakaoUserInfo(private val attributes: Map<String, Any>) : OAuth2UserInfo {
         return properties?.get("nickname") as? String
     }
 
+    // 카카오 비즈 앱이 아니라서 이메일을 못 받을 경우, 고유 ID를 이용해 임시 이메일 생성
     override fun getEmail(): String? {
         val kakaoAccount = attributes["kakao_account"] as? Map<*, *>
-        return kakaoAccount?.get("email") as? String
+        val email = kakaoAccount?.get("email") as? String
+        
+        return email ?: "kakao_${getId()}@nexusfi.com"
     }
 
     // 카카오 비즈니스 채널 설정을 통해 CI를 제공받는 경우 사용 가능
