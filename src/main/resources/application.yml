@@ -7,8 +7,7 @@ spring:
 
   threads:
     virtual:
-      # Java 21 Virtual Threads 활성화
-      enabled: true
+      enabled: true # Java 21 Virtual Threads 활성화
 
   config:
     import:
@@ -16,13 +15,12 @@ spring:
       - redis.yml
       - cors.yml
       - logging.yml
+      - swagger.yml # Swagger 설정 추가
 
 server:
   port: 8080
-  # 안전한 종료 설정
-  shutdown: graceful
-  # 프록시 환경 대응
-  forward-headers-strategy: framework
+  shutdown: graceful # 안전한 종료 설정
+  forward-headers-strategy: framework # 프록시 환경 대응
 
 management:
   endpoints:

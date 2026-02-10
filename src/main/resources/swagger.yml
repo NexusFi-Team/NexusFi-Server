@@ -1,0 +1,24 @@
+springdoc:
+  api-docs:
+    path: /api-docs
+    enabled: true
+  swagger-ui:
+    path: /swagger-ui.html
+    groups-order: desc
+    operations-sorter: alpha
+    disable-swagger-default-url: true
+    display-request-duration: true
+    enabled: true
+  default-consumes-media-type: application/json
+  default-produces-media-type: application/json
+
+---
+spring:
+  config:
+    activate:
+      on-profile: prod
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false
