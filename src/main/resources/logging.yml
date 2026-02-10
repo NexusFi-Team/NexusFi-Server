@@ -1,0 +1,33 @@
+logging:
+  level:
+    com.nexusfi.server: info
+---
+spring:
+  config:
+    activate:
+      on-profile: local
+logging:
+  level:
+    com.nexusfi.server: debug
+    org.hibernate.SQL: debug
+    org.hibernate.type.descriptor.sql.BasicBinder: trace
+
+---
+spring:
+  config:
+    activate:
+      on-profile: dev
+logging:
+  level:
+    com.nexusfi.server: debug
+    org.hibernate.SQL: debug
+    org.hibernate.type.descriptor.sql.BasicBinder: trace
+
+---
+spring:
+  config:
+    activate:
+      on-profile: prd
+logging:
+  level:
+    com.nexusfi.server: info

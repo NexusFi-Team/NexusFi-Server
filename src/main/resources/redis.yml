@@ -1,0 +1,40 @@
+spring.config.activate.on-profile: local
+
+spring:
+  data:
+    redis:
+      host: 127.0.0.1
+      port: 6379
+      lettuce:
+        cluster:
+          refresh:
+            adaptive: true
+            period: 30s
+
+---
+spring.config.activate.on-profile: dev
+
+spring:
+  data:
+    redis:
+      host:
+      port:
+      lettuce:
+        cluster:
+          refresh:
+            adaptive: true
+            period: 30s
+
+---
+spring.config.activate.on-profile: prd
+
+spring:
+  data:
+    redis:
+      host:
+      port:
+      lettuce:
+        cluster:
+          refresh:
+            adaptive: true
+            period: 30s

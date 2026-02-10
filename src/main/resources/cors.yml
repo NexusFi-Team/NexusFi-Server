@@ -1,0 +1,13 @@
+cors:
+  allowed-origins: "http://localhost:3000"
+
+---
+spring.config.activate.on-profile: dev
+cors:
+  allowed-origins: "https://dev.nexusfi.com"
+
+---
+spring.config.activate.on-profile: prod
+
+cors:
+  allowed-origins: "https://nexusfi.com"

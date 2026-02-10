@@ -1,0 +1,46 @@
+spring:
+  datasource:
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: true
+        default_batch_fetch_size: 100
+
+---
+spring.config.activate.on-profile: local
+
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/nexusfi
+    username: root
+    password: '1361'
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+---
+spring.config.activate.on-profile: dev
+
+spring:
+  datasource:
+    url:
+    username: ${DB_USER}
+    password: ${DB_PASSWORD}
+  jpa:
+    hibernate:
+      ddl-auto: none
+
+---
+spring.config.activate.on-profile: prd
+
+spring:
+  datasource:
+    url:
+    username: ${DB_USER}
+    password: ${DB_PASSWORD}
+  jpa:
+    hibernate:
+      ddl-auto: none
