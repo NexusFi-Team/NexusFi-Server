@@ -92,14 +92,20 @@
 ## ⚙️ 실행 방법 (How to Run)
 
 ### Prerequisites
-- Docker (PostgreSQL, Redis)
+- Docker & Docker Compose
 - JDK 21
 
-### Commands
+### 1. 인프라 실행 (Database, Redis)
+프로젝트 루트에서 아래 명령어를 실행하면 필요한 모든 데이터베이스 환경이 구축됩니다.
 ```bash
-# 데이터베이스 실행 (Docker 사용 시)
-docker start PostgreSQL Redis
+docker-compose up -d
+```
+- **DB (PostgreSQL)**: `localhost:5432` (ID: `root` / PW: `1361`)
+- **Cache (Redis)**: `localhost:6379`
+- **DB GUI (PgAdmin)**: [http://localhost:5050](http://localhost:5050) (ID: `admin@nexusfi.com` / PW: `admin`)
 
-# 어플리케이션 빌드 및 실행
+### 2. 어플리케이션 실행
+```bash
+# 빌드 및 실행
 ./gradlew bootRun
 ```
