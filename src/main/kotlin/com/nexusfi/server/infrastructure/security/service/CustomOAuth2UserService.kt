@@ -56,8 +56,18 @@ class CustomOAuth2UserService(
     // 유저 정보 저장 또는 업데이트 로직
     private fun saveOrUpdate(socialType: SocialType, attributes: OAuth2Attributes): User {
         val user = userRepository.findBySocialTypeAndSocialId(socialType, attributes.oauth2UserInfo.getId())
-            .map { it.updateProfile(attributes.oauth2UserInfo.getNickname()) } // 기존 유저는 정보 업데이트
-            .orElseGet { attributes.toEntity(socialType, attributes.oauth2UserInfo) } // 신규 유저는 가입
+            .map { 
+                it.updateProfile(attributes.oauth2UserInfo.getNickname())
+                // 로그인 시간 업데이트
+                it.updateLastLoginAt()
+                it 
+            }
+            .orElseGet { 
+                val newUser = attributes.toEntity(socialType, attributes.oauth2UserInfo)
+                // 최초 가입 시간도 로그인 시간으로 처리
+                newUser.updateLastLoginAt()
+                newUser
+            }
 
         return userRepository.save(user)
     }

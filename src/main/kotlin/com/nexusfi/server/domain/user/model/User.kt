@@ -3,6 +3,7 @@ package com.nexusfi.server.domain.user.model
 import com.nexusfi.server.common.entity.BaseEntity
 import jakarta.persistence.*
 import java.time.LocalDate
+import java.time.LocalDateTime
 
 @Entity
 @Table(name = "users")
@@ -35,7 +36,11 @@ class User(
 
     // 회원 식별값 (CI)
     @Column
-    var ci: String? = null
+    var ci: String? = null,
+
+    // 마지막 로그인 일시
+    @Column
+    var lastLoginAt: LocalDateTime? = null
 
 ) : BaseEntity() {
 
@@ -47,6 +52,11 @@ class User(
     fun updateProfile(name: String?): User {
         name?.let { this.name = it }
         return this
+    }
+
+    // 마지막 로그인 일시 업데이트
+    fun updateLastLoginAt() {
+        this.lastLoginAt = LocalDateTime.now()
     }
 
     // 추가 정보 입력 완료 처리
