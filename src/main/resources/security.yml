@@ -1,0 +1,22 @@
+security:
+  whitelist:
+    # Swagger UI 및 API Docs
+    - /swagger-ui/**
+    - /swagger-ui.html
+    - /v3/api-docs/**
+    - /api-docs/**
+    
+    # OAuth2 및 인증 관련
+    - /login/oauth2/**
+    - /oauth2/**
+    
+    # 모니터링 및 헬스 체크
+    - /actuator/health
+    - /actuator/prometheus
+    
+    # 정적 리소스 및 기타
+    - /favicon.ico
+    - /error
+    - /robots.txt
+    - /static/**
+    - /public/**
