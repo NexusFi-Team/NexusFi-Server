@@ -1,0 +1,31 @@
+spring:
+  application:
+    name: nexusfi-server
+  
+  profiles:
+    default: local
+
+  threads:
+    virtual:
+      # Java 21 Virtual Threads 활성화
+      enabled: true
+
+  config:
+    import:
+      - database.yml
+      - redis.yml
+      - cors.yml
+      - logging.yml
+
+server:
+  port: 8080
+  # 안전한 종료 설정
+  shutdown: graceful
+  # 프록시 환경 대응
+  forward-headers-strategy: framework
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
