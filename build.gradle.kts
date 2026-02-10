@@ -46,6 +46,10 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
     
+    // 코틀린 코루틴
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
+    
     // QueryDSL (Jakarta 기반)
     implementation("com.querydsl:querydsl-jpa:5.1.0:jakarta")
     kapt("com.querydsl:querydsl-apt:5.1.0:jakarta")
@@ -59,6 +63,7 @@ dependencies {
     testImplementation("io.mockk:mockk:1.13.9")
     testImplementation("com.ninja-squad:springmockk:4.0.2")
     testImplementation("org.springframework.batch:spring-batch-test")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test")
 }
 
 // Spring Cloud 의존성 관리 설정
