@@ -3,33 +3,34 @@ package com.nexusfi.server.api.v1.user.dto
 import com.nexusfi.server.domain.user.model.Gender
 import com.nexusfi.server.domain.user.model.SocialType
 import com.nexusfi.server.domain.user.model.User
+import io.swagger.v3.oas.annotations.media.Schema
 import java.time.LocalDate
 import java.time.LocalDateTime
 
-// 사용자 정보 응답 DTO
+@Schema(description = "사용자 정보 응답")
 data class UserResponse(
-    // 사용자 고유 식별자 ID
+    @field:Schema(description = "사용자 고유 식별자 ID", example = "1")
     val id: Long?,
     
-    // 사용자 이메일 (로그인 계정)
+    @field:Schema(description = "사용자 이메일 (로그인 계정)", example = "example@nexusfi.com")
     val email: String,
     
-    // 사용자 이름 (닉네임)
-    val name: String,
+    @field:Schema(description = "사용자 이름 (닉네임)", example = "모영훈")
+    var name: String,
     
-    // 소셜 로그인 제공자 (KAKAO, GOOGLE)
+    @field:Schema(description = "소셜 로그인 제공자", example = "KAKAO")
     val socialType: SocialType,
     
-    // 생년월일 (YYYY-MM-DD)
+    @field:Schema(description = "생년월일 (YYYY-MM-DD)", example = "1995-02-10")
     val birthDate: LocalDate?,
     
-    // 성별 (MALE, FEMALE, UNKNOWN)
+    @field:Schema(description = "성별 (MALE, FEMALE, UNKNOWN)", example = "MALE")
     val gender: Gender?,
     
-    // 마지막 로그인 일시
+    @field:Schema(description = "마지막 로그인 일시", example = "2026-02-10T12:00:00")
     val lastLoginAt: LocalDateTime?,
     
-    // 프로필 정보(생년월일, 성별) 완성 여부
+    @field:Schema(description = "프로필 정보 완성 여부", example = "false")
     val isProfileCompleted: Boolean
 ) {
     companion object {
