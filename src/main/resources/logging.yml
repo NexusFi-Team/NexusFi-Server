@@ -1,7 +1,4 @@
-logging:
-  level:
-    com.nexusfi.server: info
-
+# P6Spy 및 데이터소스 관련 데코레이터 설정 (Logback 설정과는 별개)
 decorator:
   datasource:
     p6spy:
@@ -12,35 +9,9 @@ decorator:
 spring:
   config:
     activate:
-      on-profile: local
-logging:
-  level:
-    com.nexusfi.server: debug
-    org.hibernate.SQL: debug
-    org.hibernate.type.descriptor.sql.BasicBinder: trace
-    p6spy: info
-
----
-spring:
-  config:
-    activate:
-      on-profile: dev
-logging:
-  level:
-    com.nexusfi.server: debug
-    org.hibernate.SQL: debug
-    org.hibernate.type.descriptor.sql.BasicBinder: trace
-    p6spy: info
-
----
-spring:
-  config:
-    activate:
       on-profile: prd
 decorator:
   datasource:
     p6spy:
+      # 운영 환경에서는 p6spy Log 비활성화
       enable-logging: false
-logging:
-  level:
-    com.nexusfi.server: info
