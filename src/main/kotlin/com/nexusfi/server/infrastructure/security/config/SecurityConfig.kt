@@ -1,14 +1,20 @@
 package com.nexusfi.server.infrastructure.security.config
 
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.nexusfi.server.common.exception.ErrorCode
+import com.nexusfi.server.common.response.ApiResponse
 import com.nexusfi.server.infrastructure.security.handler.OAuth2SuccessHandler
 import com.nexusfi.server.infrastructure.security.jwt.JwtFilter
 import com.nexusfi.server.infrastructure.security.service.CustomOAuth2UserService
+import jakarta.servlet.http.HttpServletResponse
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.http.MediaType
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
 import org.springframework.security.config.http.SessionCreationPolicy
+import org.springframework.security.web.AuthenticationEntryPoint
 import org.springframework.security.web.SecurityFilterChain
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
 import org.springframework.web.cors.CorsUtils
@@ -21,7 +27,8 @@ class SecurityConfig(
     private val securityProperties: SecurityProperties,
     private val customOAuth2UserService: CustomOAuth2UserService,
     private val oAuth2SuccessHandler: OAuth2SuccessHandler,
-    private val jwtFilter: JwtFilter
+    private val jwtFilter: JwtFilter,
+    private val objectMapper: ObjectMapper
 ) {
 
     @Bean
@@ -35,6 +42,9 @@ class SecurityConfig(
             // 세션 정책을 Stateless로 설정 (JWT 사용)
             .sessionManagement { it.sessionCreationPolicy(SessionCreationPolicy.STATELESS) }
             
+            // 인증 예외 핸들링 (401 JSON 응답)
+            .exceptionHandling { it.authenticationEntryPoint(unauthorizedEntryPoint()) }
+
             // 요청 권한 설정
             .authorizeHttpRequests { auth ->
                 auth
@@ -57,5 +67,18 @@ class SecurityConfig(
             .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter::class.java)
 
         return http.build()
+    }
+
+    // 인증되지 않은 사용자가 보호된 리소스에 접근했을 때 호출되는 엔트리 포인트
+    private fun unauthorizedEntryPoint(): AuthenticationEntryPoint {
+        return AuthenticationEntryPoint { _, response, _ ->
+            response.status = HttpServletResponse.SC_UNAUTHORIZED
+            response.contentType = MediaType.APPLICATION_JSON_VALUE
+            response.characterEncoding = "UTF-8"
+            
+            val apiResponse = ApiResponse.error(ErrorCode.UNAUTHORIZED)
+            val json = objectMapper.writeValueAsString(apiResponse)
+            response.writer.write(json)
+        }
     }
 }
