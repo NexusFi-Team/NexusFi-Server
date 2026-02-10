@@ -23,5 +23,7 @@ enum class ErrorCode(
     // Auth
     INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "A001", "유효하지 않은 토큰입니다."),
     EXPIRED_TOKEN(HttpStatus.UNAUTHORIZED, "A002", "만료된 토큰입니다."),
-    UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "A003", "인증 정보가 없거나 부족합니다.")
+    UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "A003", "인증 정보가 없거나 부족합니다."),
+    MALFORMED_TOKEN(HttpStatus.UNAUTHORIZED, "A004", "변조된 토큰입니다."),
+    EMPTY_TOKEN(HttpStatus.UNAUTHORIZED, "A005", "토큰 정보가 비어있습니다.")
 }
