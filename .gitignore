@@ -39,3 +39,6 @@ build/
 
 ### Custom ###
 GEMINI.md
+
+### Docker ###
+docker/db/data/

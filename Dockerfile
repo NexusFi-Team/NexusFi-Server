@@ -1,9 +1,6 @@
-# Build stage
-FROM eclipse-temurin:21-jdk-alpine AS build
+# Build stage - Alpine 대신 Debian 기반 이미지 사용 (ARM64 호환성)
+FROM eclipse-temurin:21-jdk AS build
 WORKDIR /app
-
-# 빌드 도구 설치 (개행 문자 처리를 위한 tr 등)
-RUN apk add --no-cache bash
 
 # 의존성 해결을 위해 필요한 파일만 먼저 복사하여 캐싱 활용
 COPY gradlew .
@@ -17,14 +14,14 @@ RUN tr -d '\r' < gradlew > gradlew_unix && \
     chmod +x gradlew && \
     chmod -R +x gradle/
 
-# Gradle 래퍼 및 기본 설정 캐싱 (도움말 실행으로 래퍼 다운로드 유도)
-RUN ./gradlew help --no-daemon -i
+# 의존성 다운로드 (캐싱 활용)
+RUN ./gradlew dependencies --no-daemon
 
 # 소스 코드 복사 및 빌드
 COPY src src
-RUN ./gradlew bootJar -x test --no-daemon -i
+RUN ./gradlew bootJar -x test --no-daemon
 
-# Run stage
+# Run stage - 런타임은 Alpine 사용 가능 (네이티브 빌드 없음)
 FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app
 
