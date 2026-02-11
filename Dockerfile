@@ -14,14 +14,15 @@ COPY settings.gradle.kts .
 # gradlew 개행 문자 수정 및 실행 권한 부여
 RUN tr -d '\r' < gradlew > gradlew_unix && \
     mv gradlew_unix gradlew && \
-    chmod +x gradlew
+    chmod +x gradlew && \
+    chmod -R +x gradle/
 
-# 의존성 먼저 다운로드 (코드 변경 시 캐시 활용 가능)
-RUN ./gradlew dependencies --no-daemon
+# Gradle 래퍼 및 기본 설정 캐싱 (도움말 실행으로 래퍼 다운로드 유도)
+RUN ./gradlew help --no-daemon -i
 
 # 소스 코드 복사 및 빌드
 COPY src src
-RUN ./gradlew bootJar -x test --no-daemon
+RUN ./gradlew bootJar -x test --no-daemon -i
 
 # Run stage
 FROM eclipse-temurin:21-jre-alpine
