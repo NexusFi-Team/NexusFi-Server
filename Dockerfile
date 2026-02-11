@@ -1,14 +1,29 @@
-# Build stage: 빌드 도구 설치 없이 Jar 파일을 생성하는 단계
+# Build stage
 FROM eclipse-temurin:21-jdk-alpine AS build
 WORKDIR /app
 
-# 모든 소스 복사
-COPY . .
+# 빌드 도구 설치 (개행 문자 처리를 위한 tr 등)
+RUN apk add --no-cache bash
 
-# 실행 권한 부여 및 빌드 진행 (테스트 제외하여 속도 향상)
-RUN chmod +x gradlew && ./gradlew bootJar -x test --no-daemon
+# 의존성 해결을 위해 필요한 파일만 먼저 복사하여 캐싱 활용
+COPY gradlew .
+COPY gradle gradle
+COPY build.gradle.kts .
+COPY settings.gradle.kts .
 
-# Run stage: 실행에 필요한 최소한의 환경만 구성하는 단계
+# gradlew 개행 문자 수정 및 실행 권한 부여
+RUN tr -d '\r' < gradlew > gradlew_unix && \
+    mv gradlew_unix gradlew && \
+    chmod +x gradlew
+
+# 의존성 먼저 다운로드 (코드 변경 시 캐시 활용 가능)
+RUN ./gradlew dependencies --no-daemon
+
+# 소스 코드 복사 및 빌드
+COPY src src
+RUN ./gradlew bootJar -x test --no-daemon
+
+# Run stage
 FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app
 
