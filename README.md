@@ -102,8 +102,17 @@
 
 ---
 
-## ☁️ 인프라 아키텍처 전략 (Infrastructure)
-포트폴리오용 프로젝트로서 **비용 효율성**과 **운영 편의성**을 모두 잡기 위해 AWS 프리티어를 적극 활용합니다.
+## ☁️ 인프라 및 운영 전략 (Infrastructure & DevOps)
+본 프로젝트는 협업 효율성을 극대화하기 위해 역할별로 최적화된 실행 환경을 제공합니다.
+
+### 1. 협업 환경 분리 전략
+- **Frontend Developer**: 백엔드 빌드 도구 설치 및 로컬 세팅의 번거로움을 줄이기 위해 프로젝트 내 `docker-compose.yml`을 사용하여 **DB, Redis, WAS(API Server)를 통합 컨테이너 환경**으로 실행합니다.
+- **Backend Developer (Yeonghoon)**: 
+  - **인프라**: 공통 개발 환경(`~/Documents/Yeonghoon/Develop/Docker-Infra`)에서 별도로 관리되는 전용 Docker 컨테이너(PostgreSQL, Redis)를 사용합니다.
+  - **애플리케이션**: 빠른 디버깅과 Hot-reload를 위해 Spring Boot 애플리케이션을 IDE 또는 터미널에서 직접 실행합니다.
+
+### 2. AWS 프리티어 활용 계획
+운영 비용 최소화를 위해 아래와 같이 구성합니다.
 
 | 서비스 | 구성 방식 | 스펙 (Free Tier) | 비고 |
 | :--- | :--- | :--- | :--- |
@@ -116,21 +125,23 @@
 
 ## ⚙️ 실행 방법 (How to Run)
 
-### Prerequisites
-- Docker & Docker Compose
-- JDK 21
-
-### 1. 인프라 실행 (Database, Redis)
-프로젝트 루트에서 아래 명령어를 실행하면 필요한 모든 데이터베이스 환경이 구축됩니다.
+### 🅰️ 프론트엔드 개발자용 (Full Docker)
+백엔드 빌드 도구 설치 없이 모든 환경을 한 번에 실행합니다.
 ```bash
-docker-compose up -d
+# 1. 프로젝트 최상위에서 실행 (애플리케이션까지 모두 포함)
+docker-compose up -d --build
+```
+- **API Server**: [http://localhost:8080](http://localhost:8080)
+- **Swagger UI**: [http://localhost:8080/swagger-ui.html](http://localhost:8080/swagger-ui.html)
+
+### 🅱️ 백엔드 개발자용 (Hybrid)
+인프라(DB, Redis)만 도커로 띄우고 애플리케이션은 로컬에서 실행합니다.
+```bash
+# 1. 인프라만 실행 (nexusfi-server 제외)
+docker-compose up -d nexusfi-db nexusfi-redis pgadmin
+
+# 2. 애플리케이션 실행 (Spring Boot)
+./gradlew bootRun
 ```
 - **DB (PostgreSQL)**: `localhost:5432` (ID: `root` / PW: `1361`)
 - **Cache (Redis)**: `localhost:6379`
-- **DB GUI (PgAdmin)**: [http://localhost:5050](http://localhost:5050) (ID: `admin@nexusfi.com` / PW: `admin`)
-
-### 2. 어플리케이션 실행
-```bash
-# 빌드 및 실행
-./gradlew bootRun
-```
