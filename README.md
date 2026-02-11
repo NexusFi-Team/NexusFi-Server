@@ -70,22 +70,47 @@
 
 ---
 
-## 📅 추후 개발 로드맵 (Roadmap)
+## 📅 개발 로드맵 (Backend Roadmap)
 
-### Phase 1: 인증 및 사용자 고도화
-- [ ] **Refresh Token**: Redis 연동을 통한 토큰 재발급 및 세션 연장 로직 구현.
-- [ ] **Profile Completion**: 신규 가입 사용자의 생년월일, 성별 등 추가 정보 입력 API.
-- [ ] **User Withdrawal**: 회원 탈퇴 로직 구현.
+### Step 1: 인증 및 보안 고도화 (Auth & Security)
+로그인 유지 및 안전한 세션 관리를 위한 보안 로직을 완성합니다.
+- [ ] **Refresh Token**: Redis를 활용한 토큰 재발급 및 Rotation 적용.
+- [ ] **Logout & Withdrawal**: 로그아웃 시 토큰 무효화(Blacklist) 및 회원 탈퇴 데이터 정리.
+- [ ] **Profile Completion**: 신규 가입 후 생년월일, 성별 등 필수 정보 입력 API.
 
-### Phase 2: 마이데이터 연동 (Core)
-- [ ] **CI (Connecting Information)**: 본인 인증 API 연동 및 고유 식별값 저장.
-- [ ] **Asset Scrapping**: FeignClient를 활용한 은행/카드사 자산 정보 수집 엔진.
-- [ ] **Data Normalization**: 수집된 금융 데이터를 내부 표준 규격으로 정규화.
+### Step 2: 자산 관리 도메인 구축 (Asset Core)
+마이데이터 연동 전, 자산 데이터를 체계적으로 관리할 수 있는 구조를 잡습니다.
+- [ ] **Asset Entity Design**: 은행, 계좌, 카드, 대출 등 자산 유형별 엔티티 설계.
+- [ ] **Asset CRUD API**: 사용자가 자산을 직접 등록/수정/삭제하는 기본 기능 구현.
+- [ ] **Design Pattern**: 자산 유형별(예금, 대출 등) 처리를 유연하게 할 **Factory Pattern** 도입 고려.
 
-### Phase 3: 분석 및 대시보드
-- [ ] **Consumption Analysis**: 월별 소비 카테고리 분석 로직.
-- [ ] **Asset Visualization**: 자산 총액 및 변동 그래프 데이터 API.
-- [ ] **Batch Jobs**: 매일 새벽 자동 데이터 동기화 및 통계 배치 프로세스.
+### Step 3: 소비 분석 및 가계부 (Consumption & Ledger)
+대시보드의 핵심인 소비 데이터를 처리하고 분석합니다.
+- [ ] **Ledger Schema**: 일자별 수입/지출 내역 저장 구조 설계.
+- [ ] **Calendar API**: 월간 소비 흐름을 한눈에 볼 수 있는 달력 형태의 집계 API.
+- [ ] **Statistics Optimization**: 카테고리별/기간별 지출 통계 쿼리 최적화 (**QueryDSL** 도입 예정).
+
+### Step 4: 대시보드 및 시각화 (Dashboard Aggregation)
+프론트엔드에서 즉시 사용할 수 있도록 데이터를 가공하여 제공합니다.
+- [ ] **Dashboard API**: 총 자산, 월간 소비액, 전월 대비 증감률 등 핵심 지표 집계.
+- [ ] **Chart Data**: 도넛 차트(자산 비율), 막대 그래프(소비 추이)용 JSON 응답 규격화.
+
+### Step 5: 배포 및 운영 (DevOps & Deployment)
+안정적인 서비스 운영을 위한 클라우드 환경을 구축합니다.
+- [ ] **CI/CD**: GitHub Actions를 통한 자동 빌드 및 배포 파이프라인 구축.
+- [ ] **AWS Architecture**: 비용 효율적인 프리티어(Free-tier) 인프라 구성.
+
+---
+
+## ☁️ 인프라 아키텍처 전략 (Infrastructure)
+포트폴리오용 프로젝트로서 **비용 효율성**과 **운영 편의성**을 모두 잡기 위해 AWS 프리티어를 적극 활용합니다.
+
+| 서비스 | 구성 방식 | 스펙 (Free Tier) | 비고 |
+| :--- | :--- | :--- | :--- |
+| **WAS** | **AWS EC2** | `t2.micro` (1 vCPU, 1GB RAM) | Docker 기반 애플리케이션 실행 |
+| **DB** | **Amazon RDS** | `db.t3.micro` (PostgreSQL) | 관리형 DB 사용, 자동 백업 지원 |
+| **Cache** | **Redis Cloud** | Free Plan (30MB) | EC2 메모리 절약을 위해 외부 관리형 서비스 사용 |
+| **Web** | **Vercel / Netlify** | Free Plan | 정적 프론트엔드 호스팅 및 CDN 제공 |
 
 ---
 
