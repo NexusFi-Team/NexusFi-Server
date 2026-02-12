@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.RestControllerAdvice
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException
 
+// 전역 예외 처리를 담당하는 클래스
 @RestControllerAdvice
 class GlobalExceptionHandler {
     private val log = LoggerFactory.getLogger(javaClass)
@@ -28,23 +29,28 @@ class GlobalExceptionHandler {
             .body(ApiResponse.error(e.errorCode))
     }
 
-    // @Valid 검증 예외 처리
+    // @Valid 검증 예외 처리 (필드명 나열 기능 추가)
     @ExceptionHandler(MethodArgumentNotValidException::class)
     fun handleMethodArgumentNotValidException(e: MethodArgumentNotValidException): ResponseEntity<ApiResponse<Unit>> {
-        log.error("MethodArgumentNotValidException", e)
-        val message = e.bindingResult.fieldError?.defaultMessage ?: ErrorCode.INVALID_INPUT_VALUE.message
+        log.error("MethodArgumentNotValidException: {}", e.message)
+        val fields = e.bindingResult.fieldErrors.map { it.field }.distinct().joinToString(", ")
+        val message = "${ErrorCode.INVALID_INPUT_VALUE.message} ($fields)"
+        
         return ResponseEntity
             .status(ErrorCode.INVALID_INPUT_VALUE.status)
             .body(ApiResponse.error(ErrorCode.INVALID_INPUT_VALUE, message))
     }
 
-    // @Validated 검증 예외 처리 (메서드 파라미터 등)
+    // @Validated 검증 예외 처리 (메서드 파라미터 등, 필드명 추출 추가)
     @ExceptionHandler(ConstraintViolationException::class)
     fun handleConstraintViolationException(e: ConstraintViolationException): ResponseEntity<ApiResponse<Unit>> {
-        log.error("ConstraintViolationException", e)
+        log.error("ConstraintViolationException: {}", e.message)
+        val fields = e.constraintViolations.map { it.propertyPath.toString().split(".").last() }.distinct().joinToString(", ")
+        val message = "${ErrorCode.INVALID_INPUT_VALUE.message} ($fields)"
+        
         return ResponseEntity
             .status(ErrorCode.INVALID_INPUT_VALUE.status)
-            .body(ApiResponse.error(ErrorCode.INVALID_INPUT_VALUE, e.message ?: ErrorCode.INVALID_INPUT_VALUE.message))
+            .body(ApiResponse.error(ErrorCode.INVALID_INPUT_VALUE, message))
     }
 
     // 필수 쿼리 파라미터 누락 예외 처리

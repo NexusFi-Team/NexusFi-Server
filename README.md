@@ -75,7 +75,7 @@
 ### Step 1: 인증 및 보안 고도화 (Auth & Security)
 - [x] **Refresh Token**: Redis를 활용한 토큰 재발급 및 Rotation 적용.
 - [x] **Logout & Withdrawal**: 로그아웃 시 토큰 무효화(Blacklist) 및 회원 탈퇴 처리.
-- [ ] **Profile Completion**: 신규 가입 후 추가 정보(생년월일 등) 입력 API.
+- [x] **Profile Completion**: 신규 가입 후 추가 정보(생년월일 등) 입력 API.
 
 ### Step 2: 자산 관리 도메인 구축 (Asset Core)
 - [ ] **Asset Entity Design**: 은행, 계좌, 카드 등 자산 유형별 엔티티 설계.

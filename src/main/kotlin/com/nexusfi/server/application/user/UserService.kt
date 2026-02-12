@@ -35,4 +35,13 @@ class UserService(
             gender = request.gender
         )
     }
+
+    // 회원 탈퇴 (데이터 영구 삭제)
+    @Transactional
+    fun deleteUser(email: String, socialType: SocialType) {
+        val user = userRepository.findByEmailAndSocialType(email, socialType)
+            .orElseThrow { BusinessException(ErrorCode.USER_NOT_FOUND) }
+        
+        userRepository.delete(user)
+    }
 }
