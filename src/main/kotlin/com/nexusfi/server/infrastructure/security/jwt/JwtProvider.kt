@@ -67,6 +67,12 @@ class JwtProvider(
         return SocialType.valueOf(socialTypeName)
     }
 
+    // 토큰의 남은 유효 시간(ms) 계산
+    fun getRemainingExpiration(token: String): Long {
+        val expiration = getClaims(token).expiration
+        return expiration.time - Date().time
+    }
+
     // 토큰 유효성 검증 및 예외 발생
     fun validateToken(token: String): Boolean {
         try {

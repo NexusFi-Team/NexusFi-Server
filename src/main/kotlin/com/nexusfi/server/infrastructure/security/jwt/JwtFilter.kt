@@ -1,6 +1,7 @@
 package com.nexusfi.server.infrastructure.security.jwt
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.nexusfi.server.application.auth.AuthService
 import com.nexusfi.server.common.exception.BusinessException
 import com.nexusfi.server.common.exception.ErrorCode
 import com.nexusfi.server.common.response.ApiResponse
@@ -8,6 +9,7 @@ import com.nexusfi.server.domain.user.model.UserId
 import jakarta.servlet.FilterChain
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
+import org.springframework.context.annotation.Lazy
 import org.springframework.http.MediaType
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.authority.SimpleGrantedAuthority
@@ -19,7 +21,8 @@ import org.springframework.web.filter.OncePerRequestFilter
 @Component
 class JwtFilter(
     private val jwtProvider: JwtProvider,
-    private val objectMapper: ObjectMapper
+    private val objectMapper: ObjectMapper,
+    @Lazy private val authService: AuthService // 순환 참조 방지를 위해 Lazy 주입
 ) : OncePerRequestFilter() {
 
     override fun doFilterInternal(
@@ -31,6 +34,11 @@ class JwtFilter(
 
         try {
             if (token != null && jwtProvider.validateToken(token)) {
+                // 1. 블랙리스트 여부 확인 (로그아웃된 토큰인지 체크)
+                if (authService.isBlacklisted(token)) {
+                    throw BusinessException(ErrorCode.UNAUTHORIZED)
+                }
+
                 val email = jwtProvider.getEmail(token)
                 val socialType = jwtProvider.getSocialType(token)
                 

@@ -9,6 +9,7 @@ import com.nexusfi.server.domain.user.model.UserId
 import com.nexusfi.server.infrastructure.utils.CookieUtils
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
+import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import jakarta.validation.Valid
 import org.springframework.security.core.annotation.AuthenticationPrincipal
@@ -25,7 +26,7 @@ class UserController(
 
     @Operation(summary = "내 정보 조회", description = "현재 로그인한 사용자의 정보를 조회합니다.")
     @GetMapping("/me")
-    fun getMyInfo(@AuthenticationPrincipal userId: UserId): ApiResponse<UserResponse> {
+    suspend fun getMyInfo(@AuthenticationPrincipal userId: UserId): ApiResponse<UserResponse> {
         // 복합 키 정보를 사용하여 사용자 정보 조회
         val response = userService.getMyInfo(userId.email, userId.socialType)
         return ApiResponse.success(response)
@@ -33,7 +34,7 @@ class UserController(
 
     @Operation(summary = "프로필 추가 정보 입력", description = "생년월일, 성별 등 가입 후 추가 정보를 입력합니다.")
     @PatchMapping("/profile")
-    fun completeProfile(
+    suspend fun completeProfile(
         @AuthenticationPrincipal userId: UserId,
         @Valid @RequestBody request: UserProfileRequest
     ): ApiResponse<Unit> {
@@ -43,15 +44,20 @@ class UserController(
 
     @Operation(summary = "회원 탈퇴", description = "사용자의 모든 데이터를 삭제하고 탈퇴 처리합니다.")
     @DeleteMapping("/me")
-    fun withdraw(
+    suspend fun withdraw(
         @AuthenticationPrincipal userId: UserId,
+        request: HttpServletRequest,
         response: HttpServletResponse
     ): ApiResponse<Unit> {
+        // AccessToken 추출 (로그아웃과 동일하게 블랙리스트 처리 권장)
+        val accessToken = request.getHeader("Authorization")?.substring(7)
+            ?: ""
+
         // 1. DB 데이터 영구 삭제
         userService.deleteUser(userId.email, userId.socialType)
 
-        // 2. Redis 토큰 삭제
-        authService.logout(userId.email)
+        // 2. Redis 토큰 삭제 및 블랙리스트 등록
+        authService.logout(userId.email, accessToken)
 
         // 3. 쿠키 만료 처리
         val cookie = cookieUtils.deleteCookie("refreshToken")

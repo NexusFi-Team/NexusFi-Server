@@ -28,15 +28,15 @@ class AuthController(
 
     @Operation(summary = "토큰 재발급", description = "쿠키의 Refresh Token을 사용하여 Access Token을 재발급합니다.")
     @PostMapping("/reissue")
-    fun reissue(request: HttpServletRequest, response: HttpServletResponse): ApiResponse<TokenResponse> {
+    suspend fun reissue(request: HttpServletRequest, response: HttpServletResponse): ApiResponse<TokenResponse> {
         // 1. 쿠키에서 Refresh Token 추출
         val refreshToken = cookieUtils.getCookieValue(request, "refreshToken")
             ?: throw BusinessException(ErrorCode.REFRESH_TOKEN_NOT_FOUND)
 
-        // 2. 서비스 로직 수행 (Rotation 적용)
+        // 2. 서비스 로직 수행 (Rotation 적용, suspend 호출)
         val (newAccessToken, newRefreshToken) = authService.reissue(refreshToken)
 
-        // 3. 새 Refresh Token을 쿠키에 저장 (Http Only Cookie)
+        // 3. 새 Refresh Token을 쿠키에 저장
         val cookie = cookieUtils.createCookie(
             name = "refreshToken",
             value = newRefreshToken,
@@ -49,17 +49,22 @@ class AuthController(
 
     @Operation(summary = "로그아웃", description = "로그아웃을 수행하고 토큰을 무효화합니다.")
     @PostMapping("/logout")
-    fun logout(
+    suspend fun logout(
         @AuthenticationPrincipal userId: UserId,
+        request: HttpServletRequest,
         response: HttpServletResponse
     ): ApiResponse<Unit> {
-        // 1. Redis에서 토큰 삭제
-        authService.logout(userId.email)
+        // Authorization 헤더에서 AccessToken 추출 (블랙리스트 등록용)
+        val accessToken = request.getHeader("Authorization")?.substring(7)
+            ?: throw BusinessException(ErrorCode.UNAUTHORIZED)
+
+        // 1. Redis에서 토큰 삭제 및 블랙리스트 등록 (suspend 호출)
+        authService.logout(userId.email, accessToken)
 
         // 2. 쿠키 만료 처리
         val cookie = cookieUtils.deleteCookie("refreshToken")
         response.addHeader("Set-Cookie", cookie.toString())
 
-        return ApiResponse.success(null, "로그아웃이 완료되었습니다.")
+        return ApiResponse.success(null, "로그아웃이 완료되었습니다. 그동안 이용해주셔서 감사합니다.")
     }
 }
