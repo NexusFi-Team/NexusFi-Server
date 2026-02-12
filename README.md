@@ -42,18 +42,23 @@
 ## 📂 Project Structure
 
 ```text
-src/main/kotlin/com/nexusfi/server
-├── api/                   # Presentation Layer: API 엔드포인트 및 DTO
-│   └── v1/                # API 버전 관리 (v1)
-├── application/           # Application Layer: 비즈니스 로직 조율 및 서비스
-├── domain/                # Domain Layer: 핵심 비즈니스 모델 및 규칙 (Pure Domain)
-│   ├── user/              # 사용자 도메인 (Entity, Repository, Enum)
-│   └── auth/              # 인증 관련 도메인 모델
-├── infrastructure/        # Infrastructure Layer: 외부 기술 연동 및 설정
-│   ├── security/          # Spring Security, JWT, OAuth2 연동 핵심 로직
-│   ├── config/            # 전역 설정 (JPA, Redis, P6Spy, OpenAPI 등)
-│   └── utils/             # 공용 유틸리티 클래스
-└── common/                # Common: 전역 예외 처리 및 공통 응답 규격 (ApiResponse)
+src
+├── main/kotlin/com/nexusfi/server
+│   ├── api/v1/                # Presentation: REST API 컨트롤러 및 DTO
+│   ├── application/           # Application: 비즈니스 로직 조율 (Service)
+│   ├── domain/                # Domain: 비즈니스 핵심 규칙 및 엔티티
+│   │   ├── user/              # 유저 도메인 (model, repository)
+│   │   └── auth/              # 인증 도메인 (RefreshToken)
+│   ├── infrastructure/        # Infrastructure: 외부 연동 및 기술적 설정
+│   │   ├── security/          # Security: OAuth2, JWT, Security Config
+│   │   ├── config/            # 전역 설정 (JPA, Redis, P6Spy, OpenAPI)
+│   │   └── utils/             # 공용 유틸리티 (CookieUtils)
+│   └── common/                # Common: 공통 예외 및 응답 규격 (BaseEntity 포함)
+├── main/resources/            # Resources: 환경별 설정 및 SQL
+│   ├── application.yml        # 메인 설정 및 프로파일 관리
+│   └── (database, security, jwt, logging, redis).yml
+└── test/kotlin/com/nexusfi/server
+    └── (TBD)                  # Unit & Integration Test Codes
 ```
 
 ---
@@ -95,8 +100,8 @@ src/main/kotlin/com/nexusfi/server
 - [x] **Refresh Token**: Redis를 활용한 토큰 재발급 및 Rotation 적용.
 - [x] **Logout & Withdrawal**: 로그아웃 시 토큰 무효화 및 회원 탈퇴 처리.
 - [x] **Profile Completion**: 신규 가입 후 추가 정보(생년월일 등) 입력 API.
-- [ ] **Token Blacklisting**: 로그아웃된 AccessToken의 재사용을 방지하기 위한 블랙리스트 구현.
-- [ ] **Coroutine Migration**: 전반적인 인증/유저 로직에 Kotlin Coroutine 적용.
+- [x] **Token Blacklisting**: 로그아웃된 AccessToken의 재사용을 방지하기 위한 블랙리스트 구현.
+- [x] **Coroutine Migration**: 전반적인 인증/유저 로직에 Kotlin Coroutine 적용.
 
 ### Step 2: 자산 관리 도메인 구축 (Asset Core)
 - [ ] **Asset Entity Design**: 은행, 계좌, 카드 등 자산 유형별 엔티티 설계.
