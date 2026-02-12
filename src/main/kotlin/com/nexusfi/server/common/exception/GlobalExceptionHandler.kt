@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.http.ResponseEntity
 import org.springframework.http.converter.HttpMessageNotReadableException
+import org.springframework.security.access.AccessDeniedException
 import org.springframework.web.HttpRequestMethodNotSupportedException
 import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.bind.MissingServletRequestParameterException
@@ -47,7 +48,7 @@ class GlobalExceptionHandler {
     }
 
     // 필수 쿼리 파라미터 누락 예외 처리
-    @ExceptionHandler(MissingServletRequestParameterException::class)
+    @ExceptionHandler(value = [MissingServletRequestParameterException::class])
     fun handleMissingServletRequestParameterException(e: MissingServletRequestParameterException): ResponseEntity<ApiResponse<Unit>> {
         log.error("MissingServletRequestParameterException", e)
         return ResponseEntity
