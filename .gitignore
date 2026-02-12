@@ -42,3 +42,8 @@ GEMINI.md
 
 ### Docker ###
 docker/db/data/
+
+### Logs ###
+logs/
+*.log
+

@@ -1,3 +1,0 @@
-2026-02-12 18:31:32.293  INFO 50276 --- [tomcat-handler-1] [SECURITY_EVENT] | Type: LOGIN_SUCCESS | User: 970709m@gmail.com | Info: Provider: GOOGLE | IP: 0:0:0:0:0:0:0:1
-2026-02-12 18:34:27.033  INFO 50424 --- [tomcat-handler-3] [SECURITY_EVENT] | Type: LOGIN_SUCCESS | User: 970709m@gmail.com | Info: Provider: GOOGLE | IP: 127.0.0.1
-2026-02-12 18:37:55.270  INFO 50575 --- [tomcat-handler-3] [SECURITY_EVENT] | Type: LOGIN_SUCCESS | User: 970709m@gmail.com | Info: Provider: GOOGLE | IP: 127.0.0.1
