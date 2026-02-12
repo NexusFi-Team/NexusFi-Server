@@ -7,22 +7,25 @@ import java.time.LocalDateTime
 
 @Entity
 @Table(name = "users")
+@IdClass(UserId::class)
 class User(
-    // 이메일 주소 (로그인 식별자)
-    @Column(nullable = false, unique = true)
+    // 이메일 주소 (PK Part 1)
+    @Id
+    @Column(nullable = false)
     val email: String,
+
+    // 소셜 로그인 제공자 (PK Part 2)
+    @Id
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    val socialType: SocialType,
 
     // 사용자 이름
     @Column(nullable = false)
     var name: String,
 
-    // 소셜 로그인 제공자
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    val socialType: SocialType,
-
     // 소셜 제공자별 고유 ID
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     val socialId: String,
 
     // 생년월일 (추가 정보 입력 시 채워짐)
@@ -43,10 +46,6 @@ class User(
     var lastLoginAt: LocalDateTime? = null
 
 ) : BaseEntity() {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val id: Long? = null
 
     // 소셜 정보 기반 프로필 업데이트
     fun updateProfile(name: String?): User {

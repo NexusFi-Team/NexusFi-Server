@@ -9,9 +9,6 @@ import java.time.LocalDateTime
 
 @Schema(description = "사용자 정보 응답")
 data class UserResponse(
-    @field:Schema(description = "사용자 고유 식별자 ID", example = "1")
-    val id: Long?,
-    
     @field:Schema(description = "사용자 이메일 (로그인 계정)", example = "example@nexusfi.com")
     val email: String,
     
@@ -37,7 +34,6 @@ data class UserResponse(
         // 엔티티를 DTO로 변환
         fun from(user: User): UserResponse {
             return UserResponse(
-                id = user.id,
                 email = user.email,
                 name = user.name,
                 socialType = user.socialType,

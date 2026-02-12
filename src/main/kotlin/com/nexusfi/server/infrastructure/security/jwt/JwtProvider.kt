@@ -2,6 +2,7 @@ package com.nexusfi.server.infrastructure.security.jwt
 
 import com.nexusfi.server.common.exception.BusinessException
 import com.nexusfi.server.common.exception.ErrorCode
+import com.nexusfi.server.domain.user.model.SocialType
 import com.nexusfi.server.infrastructure.security.config.JwtProperties
 import io.jsonwebtoken.Claims
 import io.jsonwebtoken.ExpiredJwtException
@@ -27,23 +28,28 @@ class JwtProvider(
     // 보안 키 생성
     private val key: SecretKey = Keys.hmacShaKeyFor(jwtProperties.secret.toByteArray())
 
-    // Access Token 생성
-    fun createAccessToken(email: String): String {
-        return createToken(email, jwtProperties.accessTokenExpiration)
+    companion object {
+        private const val SOCIAL_TYPE_KEY = "social_type"
     }
 
-    // Refresh Token 생성
-    fun createRefreshToken(email: String): String {
-        return createToken(email, jwtProperties.refreshTokenExpiration)
+    // Access Token 생성 (socialType 추가)
+    fun createAccessToken(email: String, socialType: SocialType): String {
+        return createToken(email, socialType, jwtProperties.accessTokenExpiration)
+    }
+
+    // Refresh Token 생성 (socialType 추가)
+    fun createRefreshToken(email: String, socialType: SocialType): String {
+        return createToken(email, socialType, jwtProperties.refreshTokenExpiration)
     }
 
     // 공통 토큰 생성 로직
-    private fun createToken(email: String, expiration: Long): String {
+    private fun createToken(email: String, socialType: SocialType, expiration: Long): String {
         val now = Date()
         val expiryDate = Date(now.time + expiration)
 
         return Jwts.builder()
             .subject(email)
+            .claim(SOCIAL_TYPE_KEY, socialType.name) // socialType 클레임 추가
             .issuedAt(now)
             .expiration(expiryDate)
             .signWith(key)
@@ -53,6 +59,12 @@ class JwtProvider(
     // 토큰에서 이메일 추출
     fun getEmail(token: String): String {
         return getClaims(token).subject
+    }
+
+    // 토큰에서 socialType 추출
+    fun getSocialType(token: String): SocialType {
+        val socialTypeName = getClaims(token).get(SOCIAL_TYPE_KEY, String::class.java)
+        return SocialType.valueOf(socialTypeName)
     }
 
     // 토큰 유효성 검증 및 예외 발생

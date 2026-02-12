@@ -1,5 +1,6 @@
 package com.nexusfi.server.infrastructure.security.dto
 
+import com.nexusfi.server.domain.user.model.SocialType
 import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.oauth2.core.user.OAuth2User
@@ -7,6 +8,7 @@ import org.springframework.security.oauth2.core.user.OAuth2User
 // 인증 완료 후 SecurityContext에 저장할 커스텀 사용자 객체
 class CustomOAuth2User(
     private val email: String,
+    private val socialType: SocialType,
     private val attributes: Map<String, Any>
 ) : OAuth2User {
 
@@ -28,5 +30,10 @@ class CustomOAuth2User(
     // 이메일 획득
     fun getEmail(): String {
         return email
+    }
+
+    // 소셜 타입 획득
+    fun getSocialType(): SocialType {
+        return socialType
     }
 }

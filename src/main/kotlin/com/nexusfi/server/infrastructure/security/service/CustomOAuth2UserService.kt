@@ -40,6 +40,7 @@ class CustomOAuth2UserService(
         // SecurityContext에 담길 커스텀 유저 객체 반환
         return CustomOAuth2User(
             email = user.email,
+            socialType = socialType,
             attributes = oAuth2User.attributes
         )
     }

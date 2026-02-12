@@ -10,14 +10,14 @@
 - **Framework**: Spring Boot 3.4.2
 
 ### Infrastructure & Database
-- **Database**: PostgreSQL (Main DB)
-- **Cache**: Redis (Session & Refresh Token 관리)
+- **Database**: PostgreSQL (Composite PK: `email`, `social_type` 적용)
+- **Cache**: Redis (Refresh Token 관리 및 로그아웃 블랙리스트)
 - **Monitoring**: Spring Boot Actuator
 - **Logging**: Logback, P6Spy (SQL 파라미터 로깅)
 
 ### Security & Communication
 - **Security**: Spring Security, OAuth2 Client
-- **Authentication**: JWT (JSON Web Token)
+- **Authentication**: JWT (Custom Claim: `social_type` 포함)
 - **API Communication**: Spring Cloud OpenFeign (마이데이터 API 연동 최적화)
 - **API Docs**: Springdoc OpenAPI (Swagger UI)
 
@@ -29,12 +29,13 @@
 - **Java 21 Virtual Threads**: 가상 스레드를 활성화하여 I/O 집약적인 마이데이터 호출 시 동시성 성능 극대화.
 - **Layered Configuration**: 기능별/환경별 YAML 설정 분리.
 - **Global Exception Handling**: 전역 예외 처리기 및 공통 응답 규격(`ApiResponse`) 구축.
-- **JPA Auditing**: `BaseEntity`를 통한 생성/수정일 자동화.
+- **Redis Integration**: `RedisTemplate` 및 Repository를 통한 데이터 관리 기반 마련.
 
 ### 2. 인증 시스템 (Auth)
+- **Composite PK User Schema**: 이메일과 소셜 타입을 조합한 식별자 구조 구축.
 - **SSO 연동**: 구글(Google) 및 카카오(Kakao) OAuth2 로그인 구현.
-- **JWT Provider**: Access Token 생성 및 5단계 상세 검증 로직.
-- **JWT Filter**: `OncePerRequestFilter` 기반의 인증 필터 및 에러 핸들링.
+- **Dual Token System**: Access Token(1h) 및 Refresh Token(14d) 발급.
+- **Token Management**: 리프레시 토큰의 Redis 저장 및 JWT 클레임 확장.
 
 ---
 

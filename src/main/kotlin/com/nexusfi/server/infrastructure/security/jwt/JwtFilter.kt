@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.nexusfi.server.common.exception.BusinessException
 import com.nexusfi.server.common.exception.ErrorCode
 import com.nexusfi.server.common.response.ApiResponse
+import com.nexusfi.server.domain.user.model.UserId
 import jakarta.servlet.FilterChain
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
@@ -31,10 +32,14 @@ class JwtFilter(
         try {
             if (token != null && jwtProvider.validateToken(token)) {
                 val email = jwtProvider.getEmail(token)
+                val socialType = jwtProvider.getSocialType(token)
+                
+                // UserId 복합 키 객체를 Principal로 사용
+                val userId = UserId(email, socialType)
                 
                 // 인증 객체 생성 및 SecurityContext 저장
                 val authentication = UsernamePasswordAuthenticationToken(
-                    email, null, listOf(SimpleGrantedAuthority("ROLE_USER"))
+                    userId, null, listOf(SimpleGrantedAuthority("ROLE_USER"))
                 )
                 SecurityContextHolder.getContext().authentication = authentication
             }
