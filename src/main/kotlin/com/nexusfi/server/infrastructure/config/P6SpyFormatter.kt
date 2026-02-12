@@ -2,14 +2,13 @@ package com.nexusfi.server.infrastructure.config
 
 import com.p6spy.engine.logging.Category
 import com.p6spy.engine.spy.appender.MessageFormattingStrategy
-import org.hibernate.engine.jdbc.internal.FormatStyle
-import org.springframework.stereotype.Component
-import java.util.*
+import org.springframework.context.annotation.Configuration
 
-// P6Spy SQL 로그 포맷팅 설정
-@Component
+// P6Spy의 쿼리 로그 포맷을 한 줄로 최적화하는 포맷터
+@Configuration
 class P6SpyFormatter : MessageFormattingStrategy {
-    // 로그 메시지 포맷 정의
+
+    // p6spy 버전에 맞는 정확한 파라미터 타입 적용
     override fun formatMessage(
         connectionId: Int,
         now: String?,
@@ -19,15 +18,20 @@ class P6SpyFormatter : MessageFormattingStrategy {
         sql: String?,
         url: String?
     ): String {
-        var formattedSql = sql
-        if (formattedSql != null && formattedSql.trim().isNotEmpty() && Category.STATEMENT.name == category) {
-            val trimmedSql = formattedSql.trim().lowercase(Locale.ROOT)
-            formattedSql = if (trimmedSql.startsWith("create") || trimmedSql.startsWith("alter") || trimmedSql.startsWith("comment")) {
-                FormatStyle.DDL.formatter.format(formattedSql)
-            } else {
-                FormatStyle.BASIC.formatter.format(formattedSql)
-            }
+        val formattedSql = formatSql(category, sql)
+        // [카테고리] 실행시간ms | 쿼리 내용 형식으로 한 줄 출력
+        return "[$category] ${elapsed}ms | $formattedSql"
+    }
+
+    private fun formatSql(category: String?, sql: String?): String? {
+        if (sql.isNullOrBlank()) return sql
+
+        // statement 카테고리인 경우에만 줄바꿈 제거 포맷팅 적용
+        return if (Category.STATEMENT.name.equals(category, ignoreCase = true)) {
+            // 줄바꿈 및 중복 공백 제거하여 한 줄로 만듦
+            sql.replace(Regex("\\s+"), " ").trim()
+        } else {
+            sql
         }
-        return "\n[P6Spy] execution time: ${elapsed}ms | sql: $formattedSql"
     }
 }
