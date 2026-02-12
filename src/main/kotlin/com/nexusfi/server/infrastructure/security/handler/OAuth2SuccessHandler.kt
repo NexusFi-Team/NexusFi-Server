@@ -5,6 +5,7 @@ import com.nexusfi.server.domain.auth.repository.RefreshTokenRepository
 import com.nexusfi.server.infrastructure.security.config.JwtProperties
 import com.nexusfi.server.infrastructure.security.dto.CustomOAuth2User
 import com.nexusfi.server.infrastructure.security.jwt.JwtProvider
+import com.nexusfi.server.infrastructure.utils.CookieUtils
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import org.springframework.security.core.Authentication
@@ -17,7 +18,8 @@ import org.springframework.web.util.UriComponentsBuilder
 class OAuth2SuccessHandler(
     private val jwtProvider: JwtProvider,
     private val refreshTokenRepository: RefreshTokenRepository,
-    private val jwtProperties: JwtProperties
+    private val jwtProperties: JwtProperties,
+    private val cookieUtils: CookieUtils
 ) : SimpleUrlAuthenticationSuccessHandler() {
 
     override fun onAuthenticationSuccess(
@@ -42,10 +44,17 @@ class OAuth2SuccessHandler(
             )
         )
 
-        // 프론트엔드로 리다이렉트할 URL 생성 (두 토큰 모두 포함)
+        // 유틸리티를 사용하여 리프레시 토큰을 쿠키에 저장
+        val cookie = cookieUtils.createCookie(
+            name = "refreshToken",
+            value = refreshToken,
+            maxAge = jwtProperties.refreshTokenExpiration / 1000
+        )
+        response.addHeader("Set-Cookie", cookie.toString())
+
+        // 프론트엔드로 리다이렉트할 URL 생성 (액세스 토큰만 포함)
         val targetUrl = UriComponentsBuilder.fromUriString("http://localhost:3000/login/callback")
             .queryParam("accessToken", accessToken)
-            .queryParam("refreshToken", refreshToken)
             .build().toUriString()
 
         // 리다이렉트 수행

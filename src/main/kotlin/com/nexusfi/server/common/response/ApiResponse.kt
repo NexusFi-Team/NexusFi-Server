@@ -7,13 +7,14 @@ import java.time.LocalDateTime
 data class ApiResponse<T>(
     val success: Boolean,
     val data: T? = null,
+    val message: String? = null,
     val error: ErrorDetail? = null,
     val timestamp: LocalDateTime = LocalDateTime.now()
 ) {
     companion object {
-        // 성공 응답 생성
-        fun <T> success(data: T?): ApiResponse<T> =
-            ApiResponse(success = true, data = data)
+        // 성공 응답 생성 (메시지 포함 가능)
+        fun <T> success(data: T?, message: String? = null): ApiResponse<T> =
+            ApiResponse(success = true, data = data, message = message)
 
         // 에러 응답 생성
         fun error(errorCode: ErrorCode): ApiResponse<Unit> =
