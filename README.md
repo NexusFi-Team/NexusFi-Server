@@ -42,6 +42,7 @@
 ## ✨ 핵심 기술 강점 (Technical Excellence)
 
 - **보안성 강화**: 리프레시 토큰 로테이션(RTR)과 블랙리스트 시스템을 구축하여 무상태(Stateless) 인증의 보안 약점 보완.
+- **관점 지향 프로그래밍(AOP) 지향**: 보안 로깅 등 공통 관심사를 비즈니스 로직에서 분리하여 높은 유지보수성 확보 (진행 예정).
 - **구조화된 로깅**: 모든 보안 이벤트를 `[SECURITY_EVENT]` 규격으로 남겨 사후 분석 및 모니터링 시스템(ELK 등) 연동 최적화.
 - **코드 무결성**: MockK를 활용한 단위 테스트를 통해 비즈니스 로직의 안정성 확보 및 유지보수성 향상.
 
@@ -112,11 +113,16 @@ src
 - [x] **Coroutine Migration**: 전반적인 인증/유저 로직에 Kotlin Coroutine 적용.
 - [x] **Auth Unit Test**: MockK를 이용한 인증/인가 로직 테스트 코드 작성.
 - [x] **Security Auditing**: 전용 로거를 통한 보안 이벤트 구조화 및 로그 분리.
+- [ ] **Rate Limiting**: Redis를 활용한 무차별 대입 공격(Brute-force) 방어 로직 구축.
+- [ ] **AOP Migration**: 비즈니스 로직과 보안 로깅의 완전한 분리를 위한 AOP 기반 로깅 도입.
 
 ### Step 2: 자산 관리 도메인 구축 (Asset Core) 🏃
 - [ ] **Asset Entity Design**: JPA `SINGLE_TABLE` 전략을 활용한 자산 유형별 엔티티 설계.
 - [ ] **Asset CRUD API**: 계좌, 카드 등 사용자 자산 통합 관리 기능.
 - [ ] **Design Pattern**: 자산 유형별 처리를 위한 **Factory Pattern** 도입.
+- [ ] **Soft Delete & Auditing**: 금융 데이터 이력 관리를 위한 삭제 처리 및 생성/수정 시간 자동화.
+- [ ] **Data Masking**: 민감 정보(계좌번호 등) 보호를 위한 Jackson 기반 마스킹 처리.
+- [ ] **Bulk Insert Optimization**: 대량 자산 데이터 동기화 성능 최적화.
 
 ### Step 3: 소비 분석 및 가계부 (Consumption & Ledger)
 - [ ] **Ledger Schema**: 일자별 수입/지출 내역 저장 구조 설계.
