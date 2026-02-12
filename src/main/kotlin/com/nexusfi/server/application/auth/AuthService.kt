@@ -2,6 +2,7 @@ package com.nexusfi.server.application.auth
 
 import com.nexusfi.server.common.exception.BusinessException
 import com.nexusfi.server.common.exception.ErrorCode
+import com.nexusfi.server.common.utils.SecurityLogger
 import com.nexusfi.server.domain.auth.RefreshToken
 import com.nexusfi.server.domain.auth.repository.RefreshTokenRepository
 import com.nexusfi.server.infrastructure.security.config.JwtProperties
@@ -19,7 +20,8 @@ class AuthService(
     private val jwtProvider: JwtProvider,
     private val refreshTokenRepository: RefreshTokenRepository,
     private val jwtProperties: JwtProperties,
-    private val redisTemplate: RedisTemplate<String, Any>
+    private val redisTemplate: RedisTemplate<String, Any>,
+    private val securityLogger: SecurityLogger
 ) {
 
     companion object {
@@ -38,9 +40,13 @@ class AuthService(
 
         // 3. Redis에서 기존 토큰 확인 및 검증
         val savedToken = refreshTokenRepository.findById(email)
-            .orElseThrow { BusinessException(ErrorCode.REFRESH_TOKEN_NOT_FOUND) }
+            .orElseThrow { 
+                securityLogger.warn("TOKEN_REISSUE_FAIL", email, "Refresh token not found in Redis")
+                BusinessException(ErrorCode.REFRESH_TOKEN_NOT_FOUND) 
+            }
 
         if (savedToken.token != refreshToken) {
+            securityLogger.error("TOKEN_REISSUE_FAIL", email, "Token mismatch (Potential Theft!)")
             throw BusinessException(ErrorCode.INVALID_TOKEN)
         }
 
@@ -48,7 +54,7 @@ class AuthService(
         val newAccessToken = jwtProvider.createAccessToken(email, socialType)
         val newRefreshToken = jwtProvider.createRefreshToken(email, socialType)
 
-        // 5. Redis 정보 갱신 (비동기 처리 가능하지만 DB 트랜잭션과 맞물려 있으므로 순차 처리 권장)
+        // 5. Redis 정보 갱신
         refreshTokenRepository.delete(savedToken)
         refreshTokenRepository.save(
             RefreshToken(
@@ -58,6 +64,7 @@ class AuthService(
             )
         )
 
+        securityLogger.info("TOKEN_REISSUE_SUCCESS", email, "Token rotated")
         Pair(newAccessToken, newRefreshToken)
     }
 
@@ -84,6 +91,7 @@ class AuthService(
 
         deleteJob.await()
         blacklistJob.await()
+        securityLogger.info("LOGOUT", email, "Logout successful")
     }
 
     // 토큰의 블랙리스트 여부 확인

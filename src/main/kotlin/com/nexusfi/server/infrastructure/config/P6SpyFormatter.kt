@@ -27,8 +27,8 @@ class P6SpyFormatter : MessageFormattingStrategy {
         url: String?
     ): String {
         val formattedSql = formatSql(category, sql)
-        // [카테고리] 실행시간ms | 쿼리 내용 형식으로 한 줄 출력
-        return "[$category] ${elapsed}ms | $formattedSql"
+        // [P6Spy] [카테고리] 실행시간ms | 쿼리 내용 형식으로 한 줄 출력
+        return "[P6Spy] [$category] ${elapsed}ms | $formattedSql"
     }
 
     private fun formatSql(category: String?, sql: String?): String? {

@@ -27,12 +27,14 @@ class AuthServiceTest {
     private val jwtProperties = mockk<JwtProperties>()
     private val redisTemplate = mockk<RedisTemplate<String, Any>>()
     private val valueOperations = mockk<ValueOperations<String, Any>>()
+    private val securityLogger = mockk<com.nexusfi.server.common.utils.SecurityLogger>(relaxed = true)
 
     private val authService = AuthService(
         jwtProvider,
         refreshTokenRepository,
         jwtProperties,
-        redisTemplate
+        redisTemplate,
+        securityLogger
     )
 
     private val email = "test@example.com"

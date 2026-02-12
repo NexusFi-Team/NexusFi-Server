@@ -1,5 +1,6 @@
 package com.nexusfi.server.infrastructure.security.handler
 
+import com.nexusfi.server.common.utils.SecurityLogger
 import com.nexusfi.server.domain.auth.RefreshToken
 import com.nexusfi.server.domain.auth.repository.RefreshTokenRepository
 import com.nexusfi.server.infrastructure.security.config.JwtProperties
@@ -19,7 +20,8 @@ class OAuth2SuccessHandler(
     private val jwtProvider: JwtProvider,
     private val refreshTokenRepository: RefreshTokenRepository,
     private val jwtProperties: JwtProperties,
-    private val cookieUtils: CookieUtils
+    private val cookieUtils: CookieUtils,
+    private val securityLogger: SecurityLogger
 ) : SimpleUrlAuthenticationSuccessHandler() {
 
     override fun onAuthenticationSuccess(
@@ -51,6 +53,8 @@ class OAuth2SuccessHandler(
             maxAge = jwtProperties.refreshTokenExpiration / 1000
         )
         response.addHeader("Set-Cookie", cookie.toString())
+
+        securityLogger.info("LOGIN_SUCCESS", email, "Provider: $socialType", request.remoteAddr)
 
         // 프론트엔드로 리다이렉트할 URL 생성 (액세스 토큰만 포함)
         val targetUrl = UriComponentsBuilder.fromUriString("http://localhost:3000/login/callback")

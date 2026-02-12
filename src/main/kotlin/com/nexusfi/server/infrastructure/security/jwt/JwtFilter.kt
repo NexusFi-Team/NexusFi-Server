@@ -5,6 +5,7 @@ import com.nexusfi.server.application.auth.AuthService
 import com.nexusfi.server.common.exception.BusinessException
 import com.nexusfi.server.common.exception.ErrorCode
 import com.nexusfi.server.common.response.ApiResponse
+import com.nexusfi.server.common.utils.SecurityLogger
 import com.nexusfi.server.domain.user.model.UserId
 import jakarta.servlet.FilterChain
 import jakarta.servlet.http.HttpServletRequest
@@ -22,6 +23,7 @@ import org.springframework.web.filter.OncePerRequestFilter
 class JwtFilter(
     private val jwtProvider: JwtProvider,
     private val objectMapper: ObjectMapper,
+    private val securityLogger: SecurityLogger,
     
     // 순환 참조 방지를 위해 Lazy 주입
     @field:Lazy
@@ -39,6 +41,7 @@ class JwtFilter(
             if (token != null && jwtProvider.validateToken(token)) {
                 // 1. 블랙리스트 여부 확인 (로그아웃된 토큰인지 체크)
                 if (authService.isBlacklisted(token)) {
+                    securityLogger.warn("BLACKLISTED_TOKEN_USAGE", "unknown", "Token: ${token.take(10)}...", request.remoteAddr)
                     throw BusinessException(ErrorCode.UNAUTHORIZED)
                 }
 
@@ -56,10 +59,10 @@ class JwtFilter(
             }
             filterChain.doFilter(request, response)
         } catch (e: BusinessException) {
-            // 필터 체인 내에서 발생한 토큰 예외 처리
+            securityLogger.warn("AUTH_FAILURE", "unknown", e.errorCode.message, request.remoteAddr)
             sendErrorResponse(response, e.errorCode)
         } catch (e: Exception) {
-            // 기타 예상치 못한 예외 처리
+            securityLogger.error("UNKNOWN_AUTH_ERROR", "unknown", e.message ?: "No message", request.remoteAddr)
             sendErrorResponse(response, ErrorCode.INTERNAL_SERVER_ERROR)
         }
     }

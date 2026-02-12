@@ -32,6 +32,27 @@
         </rollingPolicy>
     </appender>
 
+    <!-- 보안 로그 전용 Appender -->
+    <appender name="SECURITY_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_PATH}/security.log</file>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %5p ${PID:- } --- [%t] %m%n%wEx</pattern>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_PATH}/security.%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern>
+            <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <maxFileSize>50MB</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
+            <maxHistory>90</maxHistory> <!-- 보안 로그는 좀 더 길게(90일) 보관 -->
+        </rollingPolicy>
+    </appender>
+
+    <!-- SECURITY 전용 로거 설정 -->
+    <logger name="SECURITY" level="INFO" additivity="false">
+        <appender-ref ref="CONSOLE" />
+        <appender-ref ref="SECURITY_FILE" />
+    </logger>
+
     <!-- 프로파일별 로그 설정 -->
     
     <!-- Local 환경 -->
@@ -42,7 +63,7 @@
         <logger name="com.nexusfi.server" level="DEBUG" additivity="false">
             <appender-ref ref="CONSOLE" />
         </logger>
-        <logger name="org.hibernate.SQL" level="DEBUG" />
+        <logger name="org.hibernate.SQL" level="OFF" />
         <logger name="com.p6spy" level="INFO" />
     </springProfile>
 
@@ -53,6 +74,7 @@
             <appender-ref ref="FILE" />
         </root>
         <logger name="com.nexusfi.server" level="DEBUG" />
+        <logger name="org.hibernate.SQL" level="OFF" />
     </springProfile>
 
     <!-- Prd 환경 -->

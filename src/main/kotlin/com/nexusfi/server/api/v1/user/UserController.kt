@@ -21,7 +21,8 @@ import org.springframework.web.bind.annotation.*
 class UserController(
     private val userService: UserService,
     private val authService: AuthService,
-    private val cookieUtils: CookieUtils
+    private val cookieUtils: CookieUtils,
+    private val securityLogger: com.nexusfi.server.common.utils.SecurityLogger
 ) {
 
     @Operation(summary = "내 정보 조회", description = "현재 로그인한 사용자의 정보를 조회합니다.")
@@ -62,6 +63,8 @@ class UserController(
         // 3. 쿠키 만료 처리
         val cookie = cookieUtils.deleteCookie("refreshToken")
         response.addHeader("Set-Cookie", cookie.toString())
+
+        securityLogger.info("WITHDRAWAL", userId.email, "Social: ${userId.socialType}", request.remoteAddr)
 
         return ApiResponse.success(null, "회원 탈퇴가 완료되었습니다. 그동안 이용해주셔서 감사합니다.")
     }
