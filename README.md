@@ -39,6 +39,25 @@
 
 ---
 
+## 📂 Project Structure
+
+```text
+src/main/kotlin/com/nexusfi/server
+├── api/                   # Presentation Layer: API 엔드포인트 및 DTO
+│   └── v1/                # API 버전 관리 (v1)
+├── application/           # Application Layer: 비즈니스 로직 조율 및 서비스
+├── domain/                # Domain Layer: 핵심 비즈니스 모델 및 규칙 (Pure Domain)
+│   ├── user/              # 사용자 도메인 (Entity, Repository, Enum)
+│   └── auth/              # 인증 관련 도메인 모델
+├── infrastructure/        # Infrastructure Layer: 외부 기술 연동 및 설정
+│   ├── security/          # Spring Security, JWT, OAuth2 연동 핵심 로직
+│   ├── config/            # 전역 설정 (JPA, Redis, P6Spy, OpenAPI 등)
+│   └── utils/             # 공용 유틸리티 클래스
+└── common/                # Common: 전역 예외 처리 및 공통 응답 규격 (ApiResponse)
+```
+
+---
+
 ## 📄 프론트엔드 연동 가이드 (Integration Guide)
 
 ### 1. 소셜 로그인 흐름
