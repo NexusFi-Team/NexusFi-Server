@@ -102,6 +102,8 @@ src
 - [x] **Profile Completion**: 신규 가입 후 추가 정보(생년월일 등) 입력 API.
 - [x] **Token Blacklisting**: 로그아웃된 AccessToken의 재사용을 방지하기 위한 블랙리스트 구현.
 - [x] **Coroutine Migration**: 전반적인 인증/유저 로직에 Kotlin Coroutine 적용.
+- [ ] **Auth Unit Test**: MockK를 이용한 인증/인가 로직 테스트 코드 작성.
+- [ ] **Security Auditing**: 주요 보안 이벤트에 대한 구조화된 로깅 적용.
 
 ### Step 2: 자산 관리 도메인 구축 (Asset Core)
 - [ ] **Asset Entity Design**: 은행, 계좌, 카드 등 자산 유형별 엔티티 설계.
