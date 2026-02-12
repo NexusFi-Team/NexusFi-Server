@@ -22,7 +22,10 @@ import org.springframework.web.filter.OncePerRequestFilter
 class JwtFilter(
     private val jwtProvider: JwtProvider,
     private val objectMapper: ObjectMapper,
-    @Lazy private val authService: AuthService // 순환 참조 방지를 위해 Lazy 주입
+    
+    // 순환 참조 방지를 위해 Lazy 주입
+    @field:Lazy
+    private val authService: AuthService
 ) : OncePerRequestFilter() {
 
     override fun doFilterInternal(

@@ -88,6 +88,6 @@ class AuthService(
 
     // 토큰의 블랙리스트 여부 확인
     fun isBlacklisted(accessToken: String): Boolean {
-        return redisTemplate.hasKey(BLACKLIST_PREFIX + accessToken)
+        return redisTemplate.hasKey(BLACKLIST_PREFIX + accessToken) ?: false
     }
 }
