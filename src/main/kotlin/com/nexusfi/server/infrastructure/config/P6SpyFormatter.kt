@@ -1,14 +1,22 @@
 package com.nexusfi.server.infrastructure.config
 
 import com.p6spy.engine.logging.Category
+import com.p6spy.engine.spy.P6SpyOptions
 import com.p6spy.engine.spy.appender.MessageFormattingStrategy
+import jakarta.annotation.PostConstruct
 import org.springframework.context.annotation.Configuration
+import java.util.*
 
 // P6Spy의 쿼리 로그 포맷을 한 줄로 최적화하는 포맷터
 @Configuration
 class P6SpyFormatter : MessageFormattingStrategy {
 
-    // p6spy 버전에 맞는 정확한 파라미터 타입 적용
+    // 빈이 생성된 후 P6Spy 옵션에 포맷터를 직접 등록
+    @PostConstruct
+    fun setLogMessageFormat() {
+        P6SpyOptions.getActiveInstance().logMessageFormat = this.javaClass.name
+    }
+
     override fun formatMessage(
         connectionId: Int,
         now: String?,
