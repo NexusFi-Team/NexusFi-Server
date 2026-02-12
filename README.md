@@ -13,7 +13,7 @@
 - **Database**: PostgreSQL (Composite PK: `email`, `social_type` 적용)
 - **Cache**: Redis (Refresh Token 관리 및 로그아웃 블랙리스트)
 - **Monitoring**: Spring Boot Actuator
-- **Logging**: Logback, P6Spy (SQL 파라미터 로깅)
+- **Logging**: Logback, P6Spy (SQL 파라미터 로깅 최적화)
 
 ### Security & Communication
 - **Security**: Spring Security, OAuth2 Client
@@ -27,15 +27,23 @@
 
 ### 1. 인프라 및 핵심 설정
 - **Java 21 Virtual Threads**: 가상 스레드를 활성화하여 I/O 집약적인 마이데이터 호출 시 동시성 성능 극대화.
-- **Layered Configuration**: 기능별/환경별 YAML 설정 분리.
+- **Layered Configuration**: 기능별/환경별 YAML 설정 분리 및 관리.
 - **Global Exception Handling**: 전역 예외 처리기 및 공통 응답 규격(`ApiResponse`) 구축.
-- **Redis Integration**: `RedisTemplate` 및 Repository를 통한 데이터 관리 기반 마련.
+- **Logging Optimization**: P6Spy를 활용한 SQL 한 줄 출력 및 IPv6 IP 주소의 IPv4 변환 로깅 적용.
 
-### 2. 인증 시스템 (Auth)
+### 2. 인증 및 보안 시스템 (Auth & Security)
 - **Composite PK User Schema**: 이메일과 소셜 타입을 조합한 식별자 구조 구축.
-- **SSO 연동**: 구글(Google) 및 카카오(Kakao) OAuth2 로그인 구현.
-- **Dual Token System**: Access Token(1h) 및 Refresh Token(14d) 발급.
-- **Token Management**: 리프레시 토큰의 Redis 저장 및 JWT 클레임 확장.
+- **Refresh Token Rotation (RTR)**: Redis를 활용하여 리프레시 토큰 재발급 시 기존 토큰을 무효화하여 탈취 위험 방지.
+- **Logout & Blacklisting**: 로그아웃 시 Access Token을 Redis 블랙리스트에 등록하여 재사용 원천 차단.
+- **Security Auditing**: `SecurityLogger`를 통한 보안 이벤트 구조화 및 로그 파일 분리.
+
+---
+
+## ✨ 핵심 기술 강점 (Technical Excellence)
+
+- **보안성 강화**: 리프레시 토큰 로테이션(RTR)과 블랙리스트 시스템을 구축하여 무상태(Stateless) 인증의 보안 약점 보완.
+- **구조화된 로깅**: 모든 보안 이벤트를 `[SECURITY_EVENT]` 규격으로 남겨 사후 분석 및 모니터링 시스템(ELK 등) 연동 최적화.
+- **코드 무결성**: MockK를 활용한 단위 테스트를 통해 비즈니스 로직의 안정성 확보 및 유지보수성 향상.
 
 ---
 
@@ -52,13 +60,13 @@ src
 │   ├── infrastructure/        # Infrastructure: 외부 연동 및 기술적 설정
 │   │   ├── security/          # Security: OAuth2, JWT, Security Config
 │   │   ├── config/            # 전역 설정 (JPA, Redis, P6Spy, OpenAPI)
-│   │   └── utils/             # 공용 유틸리티 (CookieUtils)
+│   │   └── utils/             # 공용 유틸리티 (CookieUtils, SecurityLogger)
 │   └── common/                # Common: 공통 예외 및 응답 규격 (BaseEntity 포함)
 ├── main/resources/            # Resources: 환경별 설정 및 SQL
 │   ├── application.yml        # 메인 설정 및 프로파일 관리
 │   └── (database, security, jwt, logging, redis).yml
 └── test/kotlin/com/nexusfi/server
-    └── (TBD)                  # Unit & Integration Test Codes
+    └── application/           # Unit Tests (Auth, User 로직 검증)
 ```
 
 ---
@@ -96,18 +104,18 @@ src
 
 ## 📅 개발 로드맵 (Backend Roadmap)
 
-### Step 1: 인증 및 보안 고도화 (Auth & Security)
+### Step 1: 인증 및 보안 고도화 (Auth & Security) ✅
 - [x] **Refresh Token**: Redis를 활용한 토큰 재발급 및 Rotation 적용.
 - [x] **Logout & Withdrawal**: 로그아웃 시 토큰 무효화 및 회원 탈퇴 처리.
 - [x] **Profile Completion**: 신규 가입 후 추가 정보(생년월일 등) 입력 API.
 - [x] **Token Blacklisting**: 로그아웃된 AccessToken의 재사용을 방지하기 위한 블랙리스트 구현.
 - [x] **Coroutine Migration**: 전반적인 인증/유저 로직에 Kotlin Coroutine 적용.
-- [ ] **Auth Unit Test**: MockK를 이용한 인증/인가 로직 테스트 코드 작성.
-- [ ] **Security Auditing**: 주요 보안 이벤트에 대한 구조화된 로깅 적용.
+- [x] **Auth Unit Test**: MockK를 이용한 인증/인가 로직 테스트 코드 작성.
+- [x] **Security Auditing**: 전용 로거를 통한 보안 이벤트 구조화 및 로그 분리.
 
-### Step 2: 자산 관리 도메인 구축 (Asset Core)
-- [ ] **Asset Entity Design**: 은행, 계좌, 카드 등 자산 유형별 엔티티 설계.
-- [ ] **Asset CRUD API**: 사용자가 자산을 직접 관리하는 기본 기능.
+### Step 2: 자산 관리 도메인 구축 (Asset Core) 🏃
+- [ ] **Asset Entity Design**: JPA `SINGLE_TABLE` 전략을 활용한 자산 유형별 엔티티 설계.
+- [ ] **Asset CRUD API**: 계좌, 카드 등 사용자 자산 통합 관리 기능.
 - [ ] **Design Pattern**: 자산 유형별 처리를 위한 **Factory Pattern** 도입.
 
 ### Step 3: 소비 분석 및 가계부 (Consumption & Ledger)
