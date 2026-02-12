@@ -1,15 +1,15 @@
 package com.nexusfi.server.api.v1.user
 
+import com.nexusfi.server.api.v1.user.dto.UserProfileRequest
 import com.nexusfi.server.api.v1.user.dto.UserResponse
 import com.nexusfi.server.application.user.UserService
 import com.nexusfi.server.common.response.ApiResponse
 import com.nexusfi.server.domain.user.model.UserId
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
+import jakarta.validation.Valid
 import org.springframework.security.core.annotation.AuthenticationPrincipal
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 
 @Tag(name = "User API", description = "사용자 관련 API")
 @RestController
@@ -24,5 +24,15 @@ class UserController(
         // 복합 키 정보를 사용하여 사용자 정보 조회
         val response = userService.getMyInfo(userId.email, userId.socialType)
         return ApiResponse.success(response)
+    }
+
+    @Operation(summary = "프로필 추가 정보 입력", description = "생년월일, 성별 등 가입 후 추가 정보를 입력합니다.")
+    @PatchMapping("/profile")
+    fun completeProfile(
+        @AuthenticationPrincipal userId: UserId,
+        @Valid @RequestBody request: UserProfileRequest
+    ): ApiResponse<Unit> {
+        userService.completeProfile(userId.email, userId.socialType, request)
+        return ApiResponse.success(null, "프로필 정보가 저장되었습니다.")
     }
 }

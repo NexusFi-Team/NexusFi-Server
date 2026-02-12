@@ -5,6 +5,7 @@ import jakarta.persistence.*
 import java.time.LocalDate
 import java.time.LocalDateTime
 
+// 사용자 정보를 담는 도메인 엔티티
 @Entity
 @Table(name = "users")
 @IdClass(UserId::class)
@@ -35,7 +36,7 @@ class User(
     // 성별 (추가 정보 입력 시 채워짐)
     @Enumerated(EnumType.STRING)
     @Column
-    var gender: Gender? = Gender.UNKNOWN,
+    var gender: Gender? = null,
 
     // 회원 식별값 (CI)
     @Column

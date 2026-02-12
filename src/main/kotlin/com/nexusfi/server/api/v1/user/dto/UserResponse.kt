@@ -18,10 +18,10 @@ data class UserResponse(
     @field:Schema(description = "소셜 로그인 제공자", example = "KAKAO")
     val socialType: SocialType,
     
-    @field:Schema(description = "생년월일 (YYYY-MM-DD)", example = "1995-02-10")
+    @field:Schema(description = "생년월일 (YYYY-MM-DD)", example = "1997-07-09")
     val birthDate: LocalDate?,
     
-    @field:Schema(description = "성별 (MALE, FEMALE, UNKNOWN)", example = "MALE")
+    @field:Schema(description = "성별 (MALE, FEMALE)", example = "MALE")
     val gender: Gender?,
     
     @field:Schema(description = "마지막 로그인 일시", example = "2026-02-10T12:00:00")

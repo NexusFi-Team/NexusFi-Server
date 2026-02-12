@@ -1,5 +1,6 @@
 package com.nexusfi.server.application.user
 
+import com.nexusfi.server.api.v1.user.dto.UserProfileRequest
 import com.nexusfi.server.api.v1.user.dto.UserResponse
 import com.nexusfi.server.common.exception.BusinessException
 import com.nexusfi.server.common.exception.ErrorCode
@@ -19,5 +20,19 @@ class UserService(
             .orElseThrow { BusinessException(ErrorCode.USER_NOT_FOUND) }
         
         return UserResponse.from(user)
+    }
+
+    // 프로필 추가 정보 입력
+    @Transactional
+    fun completeProfile(email: String, socialType: SocialType, request: UserProfileRequest) {
+        val user = userRepository.findByEmailAndSocialType(email, socialType)
+            .orElseThrow { BusinessException(ErrorCode.USER_NOT_FOUND) }
+
+        // 엔티티 내 비즈니스 메서드 호출
+        user.completeProfile(
+            name = request.name,
+            birthDate = request.birthDate,
+            gender = request.gender
+        )
     }
 }
