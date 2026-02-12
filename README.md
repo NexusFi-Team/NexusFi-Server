@@ -11,9 +11,9 @@
 
 ### Infrastructure & Database
 - **Database**: PostgreSQL (Main DB)
-- **Cache**: Redis (Session & Refresh Token 관리 예정)
+- **Cache**: Redis (Session & Refresh Token 관리)
 - **Monitoring**: Spring Boot Actuator
-- **Logging**: Logback (Profile-specific), P6Spy (SQL 파라미터 로깅)
+- **Logging**: Logback, P6Spy (SQL 파라미터 로깅)
 
 ### Security & Communication
 - **Security**: Spring Security, OAuth2 Client
@@ -27,15 +27,14 @@
 
 ### 1. 인프라 및 핵심 설정
 - **Java 21 Virtual Threads**: 가상 스레드를 활성화하여 I/O 집약적인 마이데이터 호출 시 동시성 성능 극대화.
-- **Layered Configuration**: `database.yml`, `jwt.yml`, `security.yml` 등 기능별/환경별 YAML 설정 분리.
+- **Layered Configuration**: 기능별/환경별 YAML 설정 분리.
 - **Global Exception Handling**: 전역 예외 처리기 및 공통 응답 규격(`ApiResponse`) 구축.
 - **JPA Auditing**: `BaseEntity`를 통한 생성/수정일 자동화.
 
 ### 2. 인증 시스템 (Auth)
 - **SSO 연동**: 구글(Google) 및 카카오(Kakao) OAuth2 로그인 구현.
-- **JWT Provider**: Access Token 생성 및 5단계 상세 검증(만료, 위조, 서명 등) 로직.
-- **JWT Filter**: `OncePerRequestFilter` 기반의 인증 필터 및 필터 레이어 전용 에러 핸들링.
-- **User Domain**: 소셜 로그인 정보를 기반으로 한 유연한 사용자 엔티티 설계.
+- **JWT Provider**: Access Token 생성 및 5단계 상세 검증 로직.
+- **JWT Filter**: `OncePerRequestFilter` 기반의 인증 필터 및 에러 핸들링.
 
 ---
 
@@ -43,8 +42,8 @@
 
 ### 1. 소셜 로그인 흐름
 1.  **로그인 시작**: 아래 엔드포인트로 브라우저를 직접 이동시킵니다.
-    - 구글: `GET http://localhost:8080/oauth2/authorization/google`
-    - 카카오: `GET http://localhost:8080/oauth2/authorization/kakao`
+    - 구글: `GET /oauth2/authorization/google`
+    - 카카오: `GET /oauth2/authorization/kakao`
 2.  **인증 완료**: 소셜 로그인이 성공하면 서버에서 아래 URL로 리다이렉트합니다.
     - `URL`: `http://localhost:3000/login/callback?token={JWT_ACCESS_TOKEN}`
 3.  **토큰 관리**: 쿼리 파라미터의 `token`을 추출하여 저장하고, 이후 모든 요청 헤더에 담아주세요.
@@ -73,75 +72,57 @@
 ## 📅 개발 로드맵 (Backend Roadmap)
 
 ### Step 1: 인증 및 보안 고도화 (Auth & Security)
-로그인 유지 및 안전한 세션 관리를 위한 보안 로직을 완성합니다.
 - [ ] **Refresh Token**: Redis를 활용한 토큰 재발급 및 Rotation 적용.
-- [ ] **Logout & Withdrawal**: 로그아웃 시 토큰 무효화(Blacklist) 및 회원 탈퇴 데이터 정리.
-- [ ] **Profile Completion**: 신규 가입 후 생년월일, 성별 등 필수 정보 입력 API.
+- [ ] **Logout & Withdrawal**: 로그아웃 시 토큰 무효화(Blacklist) 및 회원 탈퇴 처리.
+- [ ] **Profile Completion**: 신규 가입 후 추가 정보(생년월일 등) 입력 API.
 
 ### Step 2: 자산 관리 도메인 구축 (Asset Core)
-마이데이터 연동 전, 자산 데이터를 체계적으로 관리할 수 있는 구조를 잡습니다.
-- [ ] **Asset Entity Design**: 은행, 계좌, 카드, 대출 등 자산 유형별 엔티티 설계.
-- [ ] **Asset CRUD API**: 사용자가 자산을 직접 등록/수정/삭제하는 기본 기능 구현.
-- [ ] **Design Pattern**: 자산 유형별(예금, 대출 등) 처리를 유연하게 할 **Factory Pattern** 도입 고려.
+- [ ] **Asset Entity Design**: 은행, 계좌, 카드 등 자산 유형별 엔티티 설계.
+- [ ] **Asset CRUD API**: 사용자가 자산을 직접 관리하는 기본 기능.
+- [ ] **Design Pattern**: 자산 유형별 처리를 위한 **Factory Pattern** 도입.
 
 ### Step 3: 소비 분석 및 가계부 (Consumption & Ledger)
-대시보드의 핵심인 소비 데이터를 처리하고 분석합니다.
 - [ ] **Ledger Schema**: 일자별 수입/지출 내역 저장 구조 설계.
-- [ ] **Calendar API**: 월간 소비 흐름을 한눈에 볼 수 있는 달력 형태의 집계 API.
-- [ ] **Statistics Optimization**: 카테고리별/기간별 지출 통계 쿼리 최적화 (**QueryDSL** 도입 예정).
+- [ ] **Calendar API**: 월간 소비 흐름 집계 API.
+- [ ] **Query DSL**: 통계 쿼리 최적화.
 
 ### Step 4: 대시보드 및 시각화 (Dashboard Aggregation)
-프론트엔드에서 즉시 사용할 수 있도록 데이터를 가공하여 제공합니다.
-- [ ] **Dashboard API**: 총 자산, 월간 소비액, 전월 대비 증감률 등 핵심 지표 집계.
-- [ ] **Chart Data**: 도넛 차트(자산 비율), 막대 그래프(소비 추이)용 JSON 응답 규격화.
+- [ ] **Dashboard API**: 총 자산, 월간 소비액 등 핵심 지표 집계.
+- [ ] **Chart Data**: 차트 라이브러리 연동을 위한 JSON 응답 규격화.
 
 ### Step 5: 배포 및 운영 (DevOps & Deployment)
-안정적인 서비스 운영을 위한 클라우드 환경을 구축합니다.
-- [ ] **CI/CD**: GitHub Actions를 통한 자동 빌드 및 배포 파이프라인 구축.
-- [ ] **AWS Architecture**: 비용 효율적인 프리티어(Free-tier) 인프라 구성.
+- [ ] **CI/CD**: GitHub Actions를 통한 자동 배포 파이프라인.
+- [ ] **AWS Architecture**: EC2, RDS 기반의 안정적인 운영 환경 구축.
 
 ---
 
-## ☁️ 인프라 및 운영 전략 (Infrastructure & DevOps)
-본 프로젝트는 협업 효율성을 극대화하기 위해 역할별로 최적화된 실행 환경을 제공합니다.
+## ✅ Test Strategy
+포트폴리오로서 기술적 무결성을 증명하기 위해 아래와 같은 테스트 전략을 따릅니다.
 
-### 1. 협업 환경 분리 전략
-- **Frontend Developer**: 백엔드 빌드 도구 설치 및 로컬 세팅의 번거로움을 줄이기 위해 프로젝트 내 `docker-compose.yml`을 사용하여 **DB, Redis, WAS(API Server)를 통합 컨테이너 환경**으로 실행합니다.
-- **Backend Developer (Yeonghoon)**: 
-  - **인프라**: 공통 개발 환경(`~/Documents/Yeonghoon/Develop/Docker-Infra`)에서 별도로 관리되는 전용 Docker 컨테이너(PostgreSQL, Redis)를 사용합니다.
-  - **애플리케이션**: 빠른 디버깅과 Hot-reload를 위해 Spring Boot 애플리케이션을 IDE 또는 터미널에서 직접 실행합니다.
+### 1. 테스트 기술 스택
+- **Unit Test**: JUnit5, MockK (Kotlin Idiomatic Mocking)
+- **Integration Test**: Spring Boot Test, Testcontainers (PostgreSQL, Redis)
+- **API Simulation**: **WireMock** (마이데이터 외부 API 응답 시뮬레이션)
 
-### 2. AWS 프리티어 활용 계획
-운영 비용 최소화를 위해 아래와 같이 구성합니다.
-
-| 서비스 | 구성 방식 | 스펙 (Free Tier) | 비고 |
-| :--- | :--- | :--- | :--- |
-| **WAS** | **AWS EC2** | `t2.micro` (1 vCPU, 1GB RAM) | Docker 기반 애플리케이션 실행 |
-| **DB** | **Amazon RDS** | `db.t3.micro` (PostgreSQL) | 관리형 DB 사용, 자동 백업 지원 |
-| **Cache** | **Redis Cloud** | Free Plan (30MB) | EC2 메모리 절약을 위해 외부 관리형 서비스 사용 |
-| **Web** | **Vercel / Netlify** | Free Plan | 정적 프론트엔드 호스팅 및 CDN 제공 |
+### 2. 마이데이터 연동 시뮬레이션 (MyData Simulation)
+실제 금융망 연동 제약을 극복하고 아키텍처 설계를 증명하기 위해 **시뮬레이션 통신**을 수행합니다.
+- **External API Simulation**: OpenFeign을 통해 외부 API를 호출하되, 개발/테스트 환경에서는 WireMock 서버가 실제 마이데이터 표준 규격(JSON)에 맞는 데이터를 반환하도록 구성하여 연동 로직의 무결성을 검증합니다.
 
 ---
 
 ## ⚙️ 실행 방법 (How to Run)
 
-### 🅰️ 프론트엔드 개발자용 (Full Docker)
-백엔드 빌드 도구 설치 없이 모든 환경을 한 번에 실행합니다.
+### 🅰️ 전체 환경 실행 (Docker)
 ```bash
-# 1. 프로젝트 최상위에서 실행 (애플리케이션까지 모두 포함)
 docker-compose up -d --build
 ```
-- **API Server**: [http://localhost:8080](http://localhost:8080)
-- **Swagger UI**: [http://localhost:8080/swagger-ui.html](http://localhost:8080/swagger-ui.html)
 
-### 🅱️ 백엔드 개발자용 (Hybrid)
-인프라(DB, Redis)만 도커로 띄우고 애플리케이션은 로컬에서 실행합니다.
+### 🅱️ 애플리케이션 로컬 실행 (Hybrid)
+인프라(DB, Redis)만 도커로 실행하고 WAS는 IDE에서 직접 실행합니다.
 ```bash
-# 1. 인프라만 실행 (nexusfi-server 제외)
-docker-compose up -d nexusfi-db nexusfi-redis pgadmin
+# 1. 인프라 실행
+docker-compose up -d nexusfi-db nexusfi-redis
 
-# 2. 애플리케이션 실행 (Spring Boot)
+# 2. 애플리케이션 실행
 ./gradlew bootRun
 ```
-- **DB (PostgreSQL)**: `localhost:5432` (ID: `root` / PW: `1361`)
-- **Cache (Redis)**: `localhost:6379`
