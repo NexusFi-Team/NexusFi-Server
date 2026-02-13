@@ -119,7 +119,7 @@ src
 - [x] **Auth Unit Test**: MockK를 이용한 인증/인가 로직 테스트 코드 작성.
 - [x] **Security Auditing**: 전용 로거를 통한 보안 이벤트 구조화 및 로그 분리.
 - [x] **Rate Limiting**: Redis를 활용한 무차별 대입 공격(Brute-force) 방어 로직 구축.
-- [ ] **AOP Migration**: 비즈니스 로직과 보안 로깅의 완전한 분리를 위한 AOP 기반 로깅 도입.
+- [x] **AOP Migration**: 비즈니스 로직과 보안 로깅의 완전한 분리를 위한 AOP 기반 로깅 도입.
 
 ### Step 2: 자산 관리 도메인 구축 (Asset Core) 🏃
 - [ ] **Asset Entity Design**: JPA `SINGLE_TABLE` 전략을 활용한 자산 유형별 엔티티 설계.
