@@ -3,7 +3,7 @@ package com.nexusfi.server.application.auth
 import com.nexusfi.server.common.exception.BusinessException
 import com.nexusfi.server.common.exception.ErrorCode
 import com.nexusfi.server.common.utils.RateLimiter
-import com.nexusfi.server.common.utils.SecurityLogger
+import com.nexusfi.server.common.utils.SecurityAudit
 import com.nexusfi.server.domain.auth.RefreshToken
 import com.nexusfi.server.domain.auth.repository.RefreshTokenRepository
 import com.nexusfi.server.infrastructure.security.config.JwtProperties
@@ -22,7 +22,6 @@ class AuthService(
     private val refreshTokenRepository: RefreshTokenRepository,
     private val jwtProperties: JwtProperties,
     private val redisTemplate: RedisTemplate<String, Any>,
-    private val securityLogger: SecurityLogger,
     private val rateLimiter: RateLimiter
 ) {
 
@@ -31,6 +30,7 @@ class AuthService(
     }
 
     // 토큰 재발급 (Refresh Token Rotation 적용)
+    @SecurityAudit("TOKEN_REISSUE")
     @Transactional
     suspend fun reissue(refreshToken: String): Pair<String, String> = coroutineScope {
         // 1. 토큰 유효성 검증
@@ -42,27 +42,22 @@ class AuthService(
 
         // 3. 요청 빈도 제한 확인 (1분당 5회)
         if (!rateLimiter.isAllowed("reissue:$email", 5, 60)) {
-            securityLogger.warn("RATE_LIMIT_EXCEEDED", email, "Too many reissue requests (Limit: 5/min)")
             throw BusinessException(ErrorCode.TOO_MANY_REQUESTS)
         }
 
         // 4. Redis에서 기존 토큰 확인 및 검증
         val savedToken = refreshTokenRepository.findById(email)
-            .orElseThrow { 
-                securityLogger.warn("TOKEN_REISSUE_FAIL", email, "Refresh token not found in Redis")
-                BusinessException(ErrorCode.REFRESH_TOKEN_NOT_FOUND) 
-            }
+            .orElseThrow { BusinessException(ErrorCode.REFRESH_TOKEN_NOT_FOUND) }
 
         if (savedToken.token != refreshToken) {
-            securityLogger.error("TOKEN_REISSUE_FAIL", email, "Token mismatch (Potential Theft!)")
             throw BusinessException(ErrorCode.INVALID_TOKEN)
         }
 
-        // 4. 새로운 토큰 쌍 생성
+        // 5. 새로운 토큰 쌍 생성
         val newAccessToken = jwtProvider.createAccessToken(email, socialType)
         val newRefreshToken = jwtProvider.createRefreshToken(email, socialType)
 
-        // 5. Redis 정보 갱신
+        // 6. Redis 정보 갱신
         refreshTokenRepository.delete(savedToken)
         refreshTokenRepository.save(
             RefreshToken(
@@ -72,11 +67,11 @@ class AuthService(
             )
         )
 
-        securityLogger.info("TOKEN_REISSUE_SUCCESS", email, "Token rotated")
         Pair(newAccessToken, newRefreshToken)
     }
 
     // 로그아웃 (Redis 데이터 삭제 및 블랙리스트 등록)
+    @SecurityAudit("LOGOUT")
     @Transactional
     suspend fun logout(email: String, accessToken: String) = coroutineScope {
         // 비동기 병렬 처리: 리프레시 토큰 삭제와 블랙리스트 등록 동시 진행
@@ -99,7 +94,6 @@ class AuthService(
 
         deleteJob.await()
         blacklistJob.await()
-        securityLogger.info("LOGOUT", email, "Logout successful")
     }
 
     // 토큰의 블랙리스트 여부 확인

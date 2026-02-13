@@ -118,7 +118,7 @@ src
 - [x] **Coroutine Migration**: 전반적인 인증/유저 로직에 Kotlin Coroutine 적용.
 - [x] **Auth Unit Test**: MockK를 이용한 인증/인가 로직 테스트 코드 작성.
 - [x] **Security Auditing**: 전용 로거를 통한 보안 이벤트 구조화 및 로그 분리.
-- [ ] **Rate Limiting**: Redis를 활용한 무차별 대입 공격(Brute-force) 방어 로직 구축.
+- [x] **Rate Limiting**: Redis를 활용한 무차별 대입 공격(Brute-force) 방어 로직 구축.
 - [ ] **AOP Migration**: 비즈니스 로직과 보안 로깅의 완전한 분리를 위한 AOP 기반 로깅 도입.
 
 ### Step 2: 자산 관리 도메인 구축 (Asset Core) 🏃

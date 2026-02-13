@@ -27,7 +27,6 @@ class AuthServiceTest {
     private val jwtProperties = mockk<JwtProperties>()
     private val redisTemplate = mockk<RedisTemplate<String, Any>>()
     private val valueOperations = mockk<ValueOperations<String, Any>>()
-    private val securityLogger = mockk<com.nexusfi.server.common.utils.SecurityLogger>(relaxed = true)
     private val rateLimiter = mockk<com.nexusfi.server.common.utils.RateLimiter>()
 
     private val authService = AuthService(
@@ -35,7 +34,6 @@ class AuthServiceTest {
         refreshTokenRepository,
         jwtProperties,
         redisTemplate,
-        securityLogger,
         rateLimiter
     )
 
@@ -87,7 +85,6 @@ class AuthServiceTest {
             kotlinx.coroutines.runBlocking { authService.reissue(refreshToken) }
         }
         assertEquals(ErrorCode.TOO_MANY_REQUESTS, exception.errorCode)
-        verify { securityLogger.warn("RATE_LIMIT_EXCEEDED", email, any()) }
     }
 
     @Test
