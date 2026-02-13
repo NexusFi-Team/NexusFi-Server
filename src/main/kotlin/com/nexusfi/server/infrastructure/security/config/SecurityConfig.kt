@@ -19,6 +19,8 @@ import org.springframework.security.web.AuthenticationEntryPoint
 import org.springframework.security.web.SecurityFilterChain
 import org.springframework.security.web.access.AccessDeniedHandler
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
+import org.springframework.security.web.context.RequestAttributeSecurityContextRepository
+import org.springframework.security.web.context.SecurityContextRepository
 import org.springframework.web.cors.CorsUtils
 
 // 스프링 시큐리티의 전역 설정을 담당하는 클래스
@@ -30,7 +32,8 @@ class SecurityConfig(
     private val customOAuth2UserService: CustomOAuth2UserService,
     private val oAuth2SuccessHandler: OAuth2SuccessHandler,
     private val jwtFilter: JwtFilter,
-    private val objectMapper: ObjectMapper
+    private val objectMapper: ObjectMapper,
+    private val securityContextRepository: SecurityContextRepository
 ) {
     private val log = LoggerFactory.getLogger(javaClass)
 
@@ -45,6 +48,11 @@ class SecurityConfig(
             // 세션 정책을 Stateless로 설정 (JWT 사용)
             .sessionManagement { it.sessionCreationPolicy(SessionCreationPolicy.STATELESS) }
             
+            // SecurityContext 유지 설정 보강
+            .securityContext { 
+                it.securityContextRepository(securityContextRepository)
+            }
+
             // 보안 예외 핸들링 (로그 및 응답 설정)
             .exceptionHandling { 
                 it.authenticationEntryPoint(unauthorizedEntryPoint())

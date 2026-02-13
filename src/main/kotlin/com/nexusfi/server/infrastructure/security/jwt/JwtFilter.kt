@@ -15,6 +15,8 @@ import org.springframework.http.MediaType
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.context.SecurityContextHolder
+import org.springframework.security.web.authentication.WebAuthenticationDetailsSource
+import org.springframework.security.web.context.SecurityContextRepository
 import org.springframework.stereotype.Component
 import org.springframework.web.filter.OncePerRequestFilter
 
@@ -24,6 +26,7 @@ class JwtFilter(
     private val jwtProvider: JwtProvider,
     private val objectMapper: ObjectMapper,
     private val securityLogger: SecurityLogger,
+    private val securityContextRepository: SecurityContextRepository,
     
     // 순환 참조 방지를 위해 Lazy 주입
     @field:Lazy
@@ -51,12 +54,20 @@ class JwtFilter(
                 // UserId 복합 키 객체를 Principal로 사용
                 val userId = UserId(email, socialType)
                 
-                // 인증 객체 생성 및 SecurityContext 저장
+                // 인증 객체 생성 및 세부 정보(Details) 설정
                 val authentication = UsernamePasswordAuthenticationToken(
                     userId, null, listOf(SimpleGrantedAuthority("ROLE_USER"))
-                )
-                SecurityContextHolder.getContext().authentication = authentication
+                ).apply {
+                    details = WebAuthenticationDetailsSource().buildDetails(request)
+                }
+                
+                // SecurityContext 설정 및 Repository에 저장 (비동기 처리 시 인증 유지 필수)
+                val context = SecurityContextHolder.createEmptyContext()
+                context.authentication = authentication
+                SecurityContextHolder.setContext(context)
+                securityContextRepository.saveContext(context, request, response)
             }
+            
             filterChain.doFilter(request, response)
         } catch (e: BusinessException) {
             securityLogger.warn("AUTH_FAILURE", "unknown", e.errorCode.message, request.remoteAddr)

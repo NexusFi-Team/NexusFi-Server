@@ -2,6 +2,7 @@ package com.nexusfi.server.application.auth
 
 import com.nexusfi.server.common.exception.BusinessException
 import com.nexusfi.server.common.exception.ErrorCode
+import com.nexusfi.server.common.utils.RateLimiter
 import com.nexusfi.server.common.utils.SecurityLogger
 import com.nexusfi.server.domain.auth.RefreshToken
 import com.nexusfi.server.domain.auth.repository.RefreshTokenRepository
@@ -21,7 +22,8 @@ class AuthService(
     private val refreshTokenRepository: RefreshTokenRepository,
     private val jwtProperties: JwtProperties,
     private val redisTemplate: RedisTemplate<String, Any>,
-    private val securityLogger: SecurityLogger
+    private val securityLogger: SecurityLogger,
+    private val rateLimiter: RateLimiter
 ) {
 
     companion object {
@@ -38,7 +40,13 @@ class AuthService(
         val email = jwtProvider.getEmail(refreshToken)
         val socialType = jwtProvider.getSocialType(refreshToken)
 
-        // 3. Redis에서 기존 토큰 확인 및 검증
+        // 3. 요청 빈도 제한 확인 (1분당 5회)
+        if (!rateLimiter.isAllowed("reissue:$email", 5, 60)) {
+            securityLogger.warn("RATE_LIMIT_EXCEEDED", email, "Too many reissue requests (Limit: 5/min)")
+            throw BusinessException(ErrorCode.TOO_MANY_REQUESTS)
+        }
+
+        // 4. Redis에서 기존 토큰 확인 및 검증
         val savedToken = refreshTokenRepository.findById(email)
             .orElseThrow { 
                 securityLogger.warn("TOKEN_REISSUE_FAIL", email, "Refresh token not found in Redis")

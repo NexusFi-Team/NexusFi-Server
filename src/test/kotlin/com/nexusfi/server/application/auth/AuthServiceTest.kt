@@ -28,13 +28,15 @@ class AuthServiceTest {
     private val redisTemplate = mockk<RedisTemplate<String, Any>>()
     private val valueOperations = mockk<ValueOperations<String, Any>>()
     private val securityLogger = mockk<com.nexusfi.server.common.utils.SecurityLogger>(relaxed = true)
+    private val rateLimiter = mockk<com.nexusfi.server.common.utils.RateLimiter>()
 
     private val authService = AuthService(
         jwtProvider,
         refreshTokenRepository,
         jwtProperties,
         redisTemplate,
-        securityLogger
+        securityLogger,
+        rateLimiter
     )
 
     private val email = "test@example.com"
@@ -53,6 +55,7 @@ class AuthServiceTest {
         every { jwtProvider.validateToken(refreshToken) } returns true
         every { jwtProvider.getEmail(refreshToken) } returns email
         every { jwtProvider.getSocialType(refreshToken) } returns socialType
+        every { rateLimiter.isAllowed("reissue:$email", 5, 60) } returns true
         every { refreshTokenRepository.findById(email) } returns Optional.of(savedToken)
         every { jwtProvider.createAccessToken(email, socialType) } returns newAccessToken
         every { jwtProvider.createRefreshToken(email, socialType) } returns newRefreshToken
@@ -71,12 +74,30 @@ class AuthServiceTest {
     }
 
     @Test
+    @DisplayName("토큰 재발급 실패 - 요청 빈도 제한을 초과한 경우 예외가 발생한다")
+    fun `reissue fail - rate limit exceeded`() = runTest {
+        // given
+        every { jwtProvider.validateToken(refreshToken) } returns true
+        every { jwtProvider.getEmail(refreshToken) } returns email
+        every { jwtProvider.getSocialType(refreshToken) } returns socialType
+        every { rateLimiter.isAllowed("reissue:$email", 5, 60) } returns false
+
+        // when & then
+        val exception = assertThrows(BusinessException::class.java) {
+            kotlinx.coroutines.runBlocking { authService.reissue(refreshToken) }
+        }
+        assertEquals(ErrorCode.TOO_MANY_REQUESTS, exception.errorCode)
+        verify { securityLogger.warn("RATE_LIMIT_EXCEEDED", email, any()) }
+    }
+
+    @Test
     @DisplayName("토큰 재발급 실패 - Redis에 토큰이 없는 경우 예외가 발생한다")
     fun `reissue fail - token not found`() = runTest {
         // given
         every { jwtProvider.validateToken(refreshToken) } returns true
         every { jwtProvider.getEmail(refreshToken) } returns email
         every { jwtProvider.getSocialType(refreshToken) } returns socialType
+        every { rateLimiter.isAllowed("reissue:$email", 5, 60) } returns true
         every { refreshTokenRepository.findById(email) } returns Optional.empty()
 
         // when & then
@@ -95,6 +116,7 @@ class AuthServiceTest {
         every { jwtProvider.validateToken(refreshToken) } returns true
         every { jwtProvider.getEmail(refreshToken) } returns email
         every { jwtProvider.getSocialType(refreshToken) } returns socialType
+        every { rateLimiter.isAllowed("reissue:$email", 5, 60) } returns true
         every { refreshTokenRepository.findById(email) } returns Optional.of(savedToken)
 
         // when & then
