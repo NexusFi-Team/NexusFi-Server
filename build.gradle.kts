@@ -83,10 +83,15 @@ tasks.withType<KotlinCompile> {
     kotlinOptions {
         freeCompilerArgs = listOf("-Xjsr305=strict")
         jvmTarget = "21"
+        freeCompilerArgs += "-Xbackend-threads=0"
     }
 }
 
 // JUnit5 플랫폼 사용 설정
 tasks.withType<Test> {
     useJUnitPlatform()
+    // JVM 경고 문구(Dynamic Agent Loading, Sharing) 제거
+    jvmArgs("-XX:+EnableDynamicAgentLoading", "-Xshare:off")
+    // 테스트 병렬 실행 설정 (코어 절반 사용)
+    maxParallelForks = (Runtime.getRuntime().availableProcessors() / 2).takeIf { it > 0 } ?: 1
 }

@@ -44,6 +44,10 @@
 - **보안성 강화**: 리프레시 토큰 로테이션(RTR), 블랙리스트 시스템, 그리고 **Redis 기반 Rate Limiting**을 구축하여 무상태(Stateless) 인증의 보안 약점 보완 및 무차별 대입 공격(Brute-force) 방어.
 - **비동기 인증 컨텍스트 전파**: Kotlin Coroutine(`suspend`) 환경에서 발생할 수 있는 `SecurityContext` 유실 문제를 `SecurityContextRepository` 명시적 저장을 통해 해결하여 비동기 처리의 무결성 확보.
 - **유연한 아키텍처**: 순환 참조(Circular Dependency)를 빈 설정 분리로 해결하고, 관점 지향 프로그래밍(AOP) 도입을 위한 기반을 마련하여 높은 유지보수성 지향.
+- **빌드 및 개발 환경 최적화**: 
+  - **Gradle Build Cache** 및 병렬 프로젝트 빌드 활성화로 빌드 속도 극대화.
+  - **Kotlin Parallel Compilation** 및 테스트 병렬 실행(`maxParallelForks`) 설정을 통한 CI/CD 효율성 증대.
+  - JDK 21 동적 에이전트 로딩 경고 제거 등 깨끗한 개발 로그 환경 구축.
 - **구조화된 로깅**: 모든 보안 이벤트를 `[SECURITY_EVENT]` 규격으로 남겨 사후 분석 및 모니터링 시스템(ELK 등) 연동 최적화.
 - **코드 무결성**: MockK를 활용한 단위 테스트를 통해 비즈니스 로직의 안정성 확보 및 유지보수성 향상.
 
