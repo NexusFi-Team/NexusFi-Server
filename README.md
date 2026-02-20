@@ -126,8 +126,8 @@ src
 - [x] **AOP Migration**: 비즈니스 로직과 보안 로깅의 완전한 분리를 위한 AOP 기반 로깅 도입.
 
 ### Step 2: 이벤트 기반 아키텍처 도입 (Kafka Ecosystem) 🏃
-- [ ] **Infrastructure**: Docker 기반 Kafka & Zookeeper 클러스터 구축.
-- [ ] **Security Event Streaming**: Producer/Consumer를 활용한 보안 감사 로그의 비동기 스트리밍 처리.
+- [x] **Infrastructure**: Docker 기반 Kafka & Zookeeper 클러스터 구축.
+- [x] **Security Event Streaming**: Producer/Consumer를 활용한 보안 감사 로그의 비동기 스트리밍 처리.
 - [ ] **Async Asset Sync**: 마이데이터 자산 동기화 이벤트를 카프카로 발행하여 비즈니스 로직 결합도 분리.
 - [ ] **Monitoring**: Kafka UI를 통한 메시지 흐름 및 오프셋 관리 시각화.
 
