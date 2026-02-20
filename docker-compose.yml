@@ -57,6 +57,52 @@ services:
     networks:
       - nexusfi-network
 
+  # Message Broker Coordinator (Zookeeper)
+  # 카프카의 상태를 관리하고 코디네이팅하는 시스템
+  nexusfi-zookeeper:
+    image: confluentinc/cp-zookeeper:7.5.0
+    container_name: nexusfi-zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    networks:
+      - nexusfi-network
+
+  # Message Broker (Kafka)
+  # 이벤트 기반 비동기 데이터 처리를 위한 메인 허브
+  nexusfi-kafka:
+    image: confluentinc/cp-kafka:7.5.0
+    container_name: nexusfi-kafka
+    depends_on:
+      - nexusfi-zookeeper
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: nexusfi-zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://nexusfi-kafka:29092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    networks:
+      - nexusfi-network
+
+  # Kafka UI (Akhq)
+  # 브라우저에서 편리하게 카프카 메시지와 토픽을 모니터링할 수 있는 툴 (http://localhost:8081)
+  nexusfi-kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: nexusfi-kafka-ui
+    ports:
+      - "8081:8080"
+    environment:
+      KAFKA_CLUSTERS_0_NAME: nexusfi-local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: nexusfi-kafka:29092
+      KAFKA_CLUSTERS_0_ZOOKEEPER: nexusfi-zookeeper:2181
+    depends_on:
+      - nexusfi-kafka
+    networks:
+      - nexusfi-network
+
   # Database GUI (PgAdmin)
   # 브라우저에서 편리하게 DB 내용을 확인할 수 있는 툴 (http://localhost:5050)
   pgadmin:

@@ -1,0 +1,24 @@
+spring:
+  kafka:
+    # 카프카 브로커 연결 정보
+    bootstrap-servers: localhost:9092
+    
+    # 메시지를 보내는 설정 (Producer)
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      acks: all # 데이터 유실 방지를 위한 높은 신뢰성 설정
+      retries: 3
+    
+    # 메시지를 받는 설정 (Consumer)
+    consumer:
+      group-id: nexusfi-group # 소비자들을 묶는 그룹 ID
+      auto-offset-reset: earliest # 처음부터 메시지를 읽어오도록 설정
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: "*" # 모든 패키지의 객체 역직렬화 허용
+    
+    # 공통 설정
+    listener:
+      ack-mode: record

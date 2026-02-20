@@ -56,6 +56,9 @@ dependencies {
     runtimeOnly("io.jsonwebtoken:jjwt-impl:0.12.5")
     runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.12.5")
     
+    // Apache Kafka
+    implementation("org.springframework.kafka:spring-kafka")
+    
     // QueryDSL (Jakarta 기반)
     implementation("com.querydsl:querydsl-jpa:5.1.0:jakarta")
     kapt("com.querydsl:querydsl-apt:5.1.0:jakarta")

@@ -19,6 +19,7 @@ spring:
       - oauth.yml
       - jwt.yml
       - security.yml # 보안 설정 추가
+      - kafka.yml # 카프카 설정 추가
 
 server:
   port: 8080
