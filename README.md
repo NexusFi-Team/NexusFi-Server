@@ -12,6 +12,7 @@
 ### Infrastructure & Database
 - **Database**: PostgreSQL (Composite PK: `email`, `social_type` 적용)
 - **Cache**: Redis (Refresh Token 관리 및 로그아웃 블랙리스트)
+- **Message Broker**: **Apache Kafka** (이벤트 기반 비동기 데이터 처리)
 - **Monitoring**: Spring Boot Actuator
 - **Logging**: Logback, P6Spy (SQL 파라미터 로깅 최적화)
 
@@ -43,6 +44,7 @@
 ## ✨ 핵심 기술 강점 (Technical Excellence)
 
 - **보안성 강화**: 리프레시 토큰 로테이션(RTR), 블랙리스트 시스템, 그리고 **Redis 기반 Rate Limiting**을 구축하여 무상태(Stateless) 인증의 보안 약점 보완 및 무차별 대입 공격(Brute-force) 방어.
+- **이벤트 기반 아키텍처 (EDA)**: Apache Kafka를 도입하여 시스템 간 결합도를 낮추고, 대용량 마이데이터 처리를 위한 비동기 파이프라인 구축 및 학습.
 - **OAuth2 인증 유지 전략**: `STATELESS` 세션 정책 하에서 소셜 로그인 시 인증 요청 정보(`state` 등) 유실 문제를 해결하기 위해 쿠키 기반의 `AuthorizationRequestRepository`를 커스텀 구현하여 보안성과 편의성 동시 확보.
 - **비동기 인증 컨텍스트 전파**: Kotlin Coroutine(`suspend`) 환경에서 발생할 수 있는 `SecurityContext` 유실 문제를 `SecurityContextRepository` 명시적 저장을 통해 해결하여 비동기 처리의 무결성 확보.
 - **유연한 아키텍처**: 순환 참조(Circular Dependency)를 빈 설정 분리로 해결하고, 관점 지향 프로그래밍(AOP) 도입을 위한 기반을 마련하여 높은 유지보수성 지향.
@@ -123,7 +125,13 @@ src
 - [x] **Rate Limiting**: Redis를 활용한 무차별 대입 공격(Brute-force) 방어 로직 구축.
 - [x] **AOP Migration**: 비즈니스 로직과 보안 로깅의 완전한 분리를 위한 AOP 기반 로깅 도입.
 
-### Step 2: 자산 관리 도메인 구축 (Asset Core) 🏃
+### Step 2: 이벤트 기반 아키텍처 도입 (Kafka Ecosystem) 🏃
+- [ ] **Infrastructure**: Docker 기반 Kafka & Zookeeper 클러스터 구축.
+- [ ] **Security Event Streaming**: Producer/Consumer를 활용한 보안 감사 로그의 비동기 스트리밍 처리.
+- [ ] **Async Asset Sync**: 마이데이터 자산 동기화 이벤트를 카프카로 발행하여 비즈니스 로직 결합도 분리.
+- [ ] **Monitoring**: Kafka UI를 통한 메시지 흐름 및 오프셋 관리 시각화.
+
+### Step 3: 자산 관리 도메인 구축 (Asset Core) 🏃
 - [ ] **Asset Entity Design**: JPA `SINGLE_TABLE` 전략을 활용한 자산 유형별 엔티티 설계.
 - [ ] **Asset CRUD API**: 계좌, 카드 등 사용자 자산 통합 관리 기능.
 - [ ] **Design Pattern**: 자산 유형별 처리를 위한 **Factory Pattern** 도입.
@@ -131,16 +139,16 @@ src
 - [ ] **Data Masking**: 민감 정보(계좌번호 등) 보호를 위한 Jackson 기반 마스킹 처리.
 - [ ] **Bulk Insert Optimization**: 대량 자산 데이터 동기화 성능 최적화.
 
-### Step 3: 소비 분석 및 가계부 (Consumption & Ledger)
+### Step 4: 소비 분석 및 가계부 (Consumption & Ledger)
 - [ ] **Ledger Schema**: 일자별 수입/지출 내역 저장 구조 설계.
 - [ ] **Calendar API**: 월간 소비 흐름 집계 API.
 - [ ] **Query DSL**: 통계 쿼리 최적화.
 
-### Step 4: 대시보드 및 시각화 (Dashboard Aggregation)
+### Step 5: 대시보드 및 시각화 (Dashboard Aggregation)
 - [ ] **Dashboard API**: 총 자산, 월간 소비액 등 핵심 지표 집계.
 - [ ] **Chart Data**: 차트 라이브러리 연동을 위한 JSON 응답 규격화.
 
-### Step 5: 배포 및 운영 (DevOps & Deployment)
+### Step 6: 배포 및 운영 (DevOps & Deployment)
 - [ ] **CI/CD**: GitHub Actions를 통한 자동 배포 파이프라인.
 - [ ] **AWS Architecture**: EC2, RDS 기반의 안정적인 운영 환경 구축.
 
