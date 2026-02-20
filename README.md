@@ -35,13 +35,15 @@
 - **Composite PK User Schema**: 이메일과 소셜 타입을 조합한 식별자 구조 구축.
 - **Refresh Token Rotation (RTR)**: Redis를 활용하여 리프레시 토큰 재발급 시 기존 토큰을 무효화하여 탈취 위험 방지.
 - **Logout & Blacklisting**: 로그아웃 시 Access Token을 Redis 블랙리스트에 등록하여 재사용 원천 차단.
-- **Security Auditing**: `SecurityLogger`를 통한 보안 이벤트 구조화 및 로그 파일 분리.
+- **OAuth2 Stateless Persistence**: 쿠키 기반 `AuthorizationRequestRepository`를 구현하여 `STATELESS` 환경에서도 소셜 로그인 인증 상태를 안정적으로 유지.
+- **Security Auditing**: `SecurityLogger` 및 AOP를 통한 보안 이벤트 구조화 및 로그 파일 분리.
 
 ---
 
 ## ✨ 핵심 기술 강점 (Technical Excellence)
 
 - **보안성 강화**: 리프레시 토큰 로테이션(RTR), 블랙리스트 시스템, 그리고 **Redis 기반 Rate Limiting**을 구축하여 무상태(Stateless) 인증의 보안 약점 보완 및 무차별 대입 공격(Brute-force) 방어.
+- **OAuth2 인증 유지 전략**: `STATELESS` 세션 정책 하에서 소셜 로그인 시 인증 요청 정보(`state` 등) 유실 문제를 해결하기 위해 쿠키 기반의 `AuthorizationRequestRepository`를 커스텀 구현하여 보안성과 편의성 동시 확보.
 - **비동기 인증 컨텍스트 전파**: Kotlin Coroutine(`suspend`) 환경에서 발생할 수 있는 `SecurityContext` 유실 문제를 `SecurityContextRepository` 명시적 저장을 통해 해결하여 비동기 처리의 무결성 확보.
 - **유연한 아키텍처**: 순환 참조(Circular Dependency)를 빈 설정 분리로 해결하고, 관점 지향 프로그래밍(AOP) 도입을 위한 기반을 마련하여 높은 유지보수성 지향.
 - **빌드 및 개발 환경 최적화**: 
