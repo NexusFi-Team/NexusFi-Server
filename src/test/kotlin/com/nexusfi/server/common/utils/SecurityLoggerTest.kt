@@ -5,11 +5,15 @@ import io.mockk.verify
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.slf4j.Logger
+import org.springframework.test.util.ReflectionTestUtils
 
 class SecurityLoggerTest {
 
     private val mockLogger = mockk<Logger>(relaxed = true)
-    private val securityLogger = SecurityLogger(mockLogger)
+    private val securityLogger = SecurityLogger().apply {
+        /* 내부 private log 필드에 mockLogger 주입 */
+        ReflectionTestUtils.setField(this, "log", mockLogger)
+    }
 
     @Test
     @DisplayName("보안 정보 로그가 올바른 규격으로 생성되는지 확인한다")
@@ -25,10 +29,7 @@ class SecurityLoggerTest {
 
         // then
         verify {
-            mockLogger.info(
-                "{} | Type: {} | User: {} | Info: {} | IP: {}",
-                "[SECURITY_EVENT]", type, user, info, ip
-            )
+            mockLogger.info("[INFO] [{}] [User: {}] [Msg: {}] [IP: {}]", type, user, info, ip)
         }
     }
 
@@ -45,10 +46,7 @@ class SecurityLoggerTest {
 
         // then
         verify {
-            mockLogger.warn(
-                "{} | Type: {} | User: {} | Reason: {} | IP: {}",
-                "[SECURITY_EVENT]", type, user, reason, "unknown"
-            )
+            mockLogger.warn("[WARN] [{}] [User: {}] [Msg: {}] [IP: {}]", type, user, reason, "unknown")
         }
     }
 
@@ -65,10 +63,7 @@ class SecurityLoggerTest {
 
         // then
         verify {
-            mockLogger.error(
-                "{} | Type: {} | User: {} | Message: {} | IP: {}",
-                "[SECURITY_EVENT]", type, user, message, "unknown"
-            )
+            mockLogger.error("[ERROR] [{}] [User: {}] [Msg: {}] [IP: {}]", type, user, message, "unknown")
         }
     }
 }

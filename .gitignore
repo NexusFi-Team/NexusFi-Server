@@ -37,9 +37,6 @@ build/
 ### MacOS ###
 .DS_Store
 
-### Custom ###
-GEMINI.md
-
 ### Docker ###
 docker/db/data/
 
@@ -47,3 +44,5 @@ docker/db/data/
 logs/
 *.log
 
+### Custom ###
+GEMINI.md
