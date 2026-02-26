@@ -1,5 +1,6 @@
 package com.nexusfi.server.application.transaction
 
+import com.nexusfi.server.api.v1.transaction.dto.TransactionResponse
 import com.nexusfi.server.domain.asset.model.AssetType
 import com.nexusfi.server.domain.transaction.model.Transaction
 import com.nexusfi.server.domain.transaction.model.TransactionCategory
@@ -8,6 +9,7 @@ import com.nexusfi.server.domain.transaction.repository.TransactionRepository
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDateTime
+import java.time.LocalTime
 import kotlin.random.Random
 
 // 거래 내역 비즈니스 로직 및 시뮬레이션 담당 서비스
@@ -15,6 +17,18 @@ import kotlin.random.Random
 class TransactionService(
     private val transactionRepository: TransactionRepository
 ) {
+
+    // 이번 달의 모든 거래 내역 조회
+    @Transactional(readOnly = true)
+    fun getCurrentMonthTransactions(email: String): List<TransactionResponse> {
+        val now = LocalDateTime.now()
+        val startOfMonth = now.withDayOfMonth(1).with(LocalTime.MIN)
+        val endOfMonth = now.with(LocalTime.MAX)
+
+        return transactionRepository.findAllByEmailAndTransactionAtBetweenOrderByTransactionAtDesc(
+            email, startOfMonth, endOfMonth
+        ).map { TransactionResponse.from(it) }
+    }
 
     // 특정 자산에 대해 최근 90일치 가상 거래 내역 생성
     @Transactional
