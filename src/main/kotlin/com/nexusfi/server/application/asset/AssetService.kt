@@ -82,8 +82,8 @@ class AssetService(
     // 마이데이터 연동 시뮬레이션 (랜덤 자산 생성)
     @Transactional
     suspend fun linkMyData(email: String) {
-        // 1. 사용자 존재 확인 및 상태 업데이트를 위한 조회
-        val user = userRepository.findAll().find { it.email == email }
+        // 1. 사용자 존재 확인 (이메일로 가입된 첫 번째 활성 계정 조회)
+        val user = userRepository.findByEmail(email).firstOrNull()
             ?: throw BusinessException(ErrorCode.USER_NOT_FOUND)
 
         // 2. 랜덤 자산 세트 생성

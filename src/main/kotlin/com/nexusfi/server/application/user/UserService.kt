@@ -35,6 +35,9 @@ class UserService(
             birthDate = request.birthDate,
             gender = request.gender
         )
+
+        // 명시적 저장으로 Dirty Checking 보완 (코루틴 환경 안정성 확보)
+        userRepository.save(user)
     }
 
     // 회원 탈퇴 (데이터 영구 삭제)
