@@ -26,7 +26,7 @@
 ## 🚀 현재 개발 완료된 기능 (Current Status)
 
 ### 1. 인프라 및 핵심 설정
-- **Java 21 Virtual Threads & Coroutines**: 가상 스레드를 활성화하고 코루틴을 도입하여 I/O 집약적인 마이데이터 호출 및 DB 조회 시 동시성 성능 극대화.
+- **Java 21 Virtual Threads & Coroutines**: 가상 스레드를 활성화하여 I/O 집약적인 마이데이터 호출 및 DB 조회 시 동시성 성능 극대화. 코루틴과 결합하여 비동기 프로그래밍 모델을 유지하면서도 가상 스레드의 경량성을 활용함.
 - **Layered Configuration**: 기능별/환경별 YAML 설정 분리 및 관리.
 - **Global Exception Handling**: 전역 예외 처리기 및 공통 응답 규격(`ApiResponse`) 구축.
 - **Logging Optimization**: P6Spy를 활용한 SQL 한 줄 출력 및 IPv6 IP 주소의 IPv4 변환 로깅 적용.
@@ -51,9 +51,11 @@
 
 ## ✨ 핵심 기술 강점 (Technical Excellence)
 
+- **가상 스레드(Virtual Threads) 최적화**: 
+    - **Transaction Integrity**: `Dispatchers.IO`를 이용한 강제 스레드 전환을 제거하고 가상 스레드 위에서 직접 Blocking I/O를 수행하도록 설계하여, JPA 트랜잭션 컨텍스트 유실 및 데이터베이스 업데이트 누락 문제를 원천 해결.
+    - **Simplified Concurrency**: 가상 스레드가 블로킹 호출 시 스스로 캐리어 스레드를 양보(Yield)하는 특성을 활용하여, 복잡한 디스패처 관리 없이도 높은 처리량 확보.
 - **보안성 강화**: 리프레시 토큰 로테이션(RTR), 블랙리스트 시스템, 그리고 **Redis 기반 Rate Limiting**을 구축하여 무상태(Stateless) 인증의 보안 약점 보완 및 무차별 대입 공격(Brute-force) 방어.
-- **Non-blocking I/O & Coroutine 최적화**: 
-    - **Thread Isolation**: Blocking I/O(JPA, Redis) 호출 시 `Dispatchers.IO`로 격리하여 스레드 기아(Thread Starvation) 현상 방지.
+- **Non-blocking Coroutine 활용**: 
     - **Parallel Fetching**: 전체 자산 조회 시 `async`를 활용하여 여러 자산 테이블을 병렬로 조회함으로써 응답 속도를 획기적으로 개선.
 - **OAuth2 인증 유지 전략**: `STATELESS` 세션 정책 하에서 소셜 로그인 시 인증 요청 정보(`state` 등) 유실 문제를 해결하기 위해 쿠키 기반의 `AuthorizationRequestRepository`를 커스텀 구현하여 보안성과 편의성 동시 확보.
 - **비동기 인증 컨텍스트 전파**: Kotlin Coroutine(`suspend`) 환경에서 발생할 수 있는 `SecurityContext` 유실 문제를 `SecurityContextRepository` 명시적 저장을 통해 해결하여 비동기 처리의 무결성 확보.
@@ -124,7 +126,7 @@ src
 - [x] **Asset Entity Design**: 독립 테이블 전략을 활용한 자산 유형별 엔티티 설계.
 - [x] **Integrated Transaction**: 모든 자산의 거래 내역 통합 관리 및 ID 참조 방식 도입.
 - [x] **MyData Simulation**: 최근 90일치 거래 데이터 및 랜덤 자산 생성 엔진 구축.
-- [x] **Coroutine Performance**: `Dispatchers.IO` 및 `async` 병렬 처리를 통한 조회 성능 최적화.
+- [x] **Virtual Thread Optimization**: 가상 스레드 환경에 최적화된 트랜잭션 전파 및 스레드 격리 제거.
 
 ### Step 3: 소비 분석 및 통계 (Analysis & Statistics) 🏃
 - [ ] **Query DSL Aggregation**: 기간별, 카테고리별 지출 통계 쿼리 최적화.

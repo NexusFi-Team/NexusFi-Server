@@ -17,16 +17,16 @@ class UserService(
     private val userRepository: UserRepository
 ) {
     // 내 정보 조회 (이메일과 소셜 타입을 조합하여 정확한 유저 조회)
-    suspend fun getMyInfo(email: String, socialType: SocialType): UserResponse = withContext(Dispatchers.IO) {
+    suspend fun getMyInfo(email: String, socialType: SocialType): UserResponse {
         val user = userRepository.findByEmailAndSocialType(email, socialType)
             .orElseThrow { BusinessException(ErrorCode.USER_NOT_FOUND) }
         
-        UserResponse.from(user)
+        return UserResponse.from(user)
     }
 
     // 프로필 추가 정보 입력
     @Transactional
-    suspend fun completeProfile(email: String, socialType: SocialType, request: UserProfileRequest) = withContext(Dispatchers.IO) {
+    suspend fun completeProfile(email: String, socialType: SocialType, request: UserProfileRequest) {
         val user = userRepository.findByEmailAndSocialType(email, socialType)
             .orElseThrow { BusinessException(ErrorCode.USER_NOT_FOUND) }
 
@@ -39,7 +39,7 @@ class UserService(
 
     // 회원 탈퇴 (데이터 영구 삭제)
     @Transactional
-    suspend fun deleteUser(email: String, socialType: SocialType) = withContext(Dispatchers.IO) {
+    suspend fun deleteUser(email: String, socialType: SocialType) {
         val user = userRepository.findByEmailAndSocialType(email, socialType)
             .orElseThrow { BusinessException(ErrorCode.USER_NOT_FOUND) }
         

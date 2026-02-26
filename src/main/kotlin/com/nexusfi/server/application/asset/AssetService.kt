@@ -30,10 +30,10 @@ class AssetService(
     // 전체 자산 목록 조회 (병렬 처리 적용)
     @Transactional(readOnly = true)
     suspend fun getAllAssets(email: String): List<AssetResponse> = coroutineScope {
-        // 1. 각 자산 테이블을 비동기 병렬로 조회 (IO 스레드 활용)
-        val accountsDeferred = async(Dispatchers.IO) { accountRepository.findAllByEmail(email) }
-        val cardsDeferred = async(Dispatchers.IO) { cardRepository.findAllByEmail(email) }
-        val loansDeferred = async(Dispatchers.IO) { loanRepository.findAllByEmail(email) }
+        // 1. 각 자산 테이블을 비동기 병렬로 조회 (Virtual Threads가 blocking I/O를 효율적으로 처리)
+        val accountsDeferred = async { accountRepository.findAllByEmail(email) }
+        val cardsDeferred = async { cardRepository.findAllByEmail(email) }
+        val loansDeferred = async { loanRepository.findAllByEmail(email) }
 
         // 2. 결과 대기 및 통합
         val accounts = accountsDeferred.await()
@@ -81,10 +81,8 @@ class AssetService(
 
     // 마이데이터 연동 시뮬레이션 (랜덤 자산 생성)
     @Transactional
-    suspend fun linkMyData(email: String) = withContext(Dispatchers.IO) {
+    suspend fun linkMyData(email: String) {
         // 1. 사용자 존재 확인 및 상태 업데이트를 위한 조회
-        // (복합 키를 쓰지만 email이 유니크하므로 간단히 조회하거나, 실제로는 socialType까지 필요할 수 있음)
-        // 여기서는 예시로 email 기반 조회를 가정 (UserRepository에 findByEmail이 있다고 가정)
         val user = userRepository.findAll().find { it.email == email }
             ?: throw BusinessException(ErrorCode.USER_NOT_FOUND)
 

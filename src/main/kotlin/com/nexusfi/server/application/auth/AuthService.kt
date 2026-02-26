@@ -43,18 +43,15 @@ class AuthService(
         val socialType = jwtProvider.getSocialType(refreshToken)
 
         // 3. 요청 빈도 제한 확인 (1분당 5회)
-        val isAllowed = withContext(Dispatchers.IO) {
-            rateLimiter.isAllowed("reissue:$email", 5, 60)
-        }
+        val isAllowed = rateLimiter.isAllowed("reissue:$email", 5, 60)
+        
         if (!isAllowed) {
             throw BusinessException(ErrorCode.TOO_MANY_REQUESTS)
         }
 
         // 4. Redis에서 기존 토큰 확인 및 검증
-        val savedToken = withContext(Dispatchers.IO) {
-            refreshTokenRepository.findById(email)
-                .orElseThrow { BusinessException(ErrorCode.REFRESH_TOKEN_NOT_FOUND) }
-        }
+        val savedToken = refreshTokenRepository.findById(email)
+            .orElseThrow { BusinessException(ErrorCode.REFRESH_TOKEN_NOT_FOUND) }
 
         if (savedToken.token != refreshToken) {
             throw BusinessException(ErrorCode.INVALID_TOKEN)
@@ -65,16 +62,14 @@ class AuthService(
         val newRefreshToken = jwtProvider.createRefreshToken(email, socialType)
 
         // 6. Redis 정보 갱신
-        withContext(Dispatchers.IO) {
-            refreshTokenRepository.delete(savedToken)
-            refreshTokenRepository.save(
-                RefreshToken(
-                    email = email,
-                    token = newRefreshToken,
-                    expiration = jwtProperties.refreshTokenExpiration / 1000
-                )
+        refreshTokenRepository.delete(savedToken)
+        refreshTokenRepository.save(
+            RefreshToken(
+                email = email,
+                token = newRefreshToken,
+                expiration = jwtProperties.refreshTokenExpiration / 1000
             )
-        }
+        )
 
         Pair(newAccessToken, newRefreshToken)
     }
@@ -84,12 +79,12 @@ class AuthService(
     @Transactional
     suspend fun logout(email: String, accessToken: String) = coroutineScope {
         // 비동기 병렬 처리: 리프레시 토큰 삭제와 블랙리스트 등록 동시 진행
-        val deleteJob = async(Dispatchers.IO) {
+        val deleteJob = async {
             val savedToken = refreshTokenRepository.findById(email).orElse(null)
             savedToken?.let { refreshTokenRepository.delete(it) }
         }
 
-        val blacklistJob = async(Dispatchers.IO) {
+        val blacklistJob = async {
             val remainingTime = jwtProvider.getRemainingExpiration(accessToken)
             if (remainingTime > 0) {
                 redisTemplate.opsForValue().set(
