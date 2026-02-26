@@ -44,7 +44,7 @@ class User(
 
     // 사용자 상태
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "varchar(255) default 'ACTIVE'")
     var status: UserStatus = UserStatus.ACTIVE,
 
     // 마지막 로그인 일시

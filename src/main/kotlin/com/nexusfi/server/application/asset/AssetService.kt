@@ -1,6 +1,7 @@
 package com.nexusfi.server.application.asset
 
 import com.nexusfi.server.api.v1.asset.dto.AssetResponse
+import com.nexusfi.server.application.transaction.TransactionService
 import com.nexusfi.server.common.exception.BusinessException
 import com.nexusfi.server.common.exception.ErrorCode
 import com.nexusfi.server.domain.asset.model.AssetType
@@ -22,7 +23,8 @@ class AssetService(
     private val cardRepository: CardRepository,
     private val loanRepository: LoanRepository,
     private val userRepository: UserRepository,
-    private val assetFactory: AssetFactory
+    private val assetFactory: AssetFactory,
+    private val transactionService: TransactionService
 ) {
 
     // 전체 자산 목록 조회 (병렬 처리 적용)
@@ -92,11 +94,16 @@ class AssetService(
         val newLoans = if (Math.random() > 0.5) listOf(assetFactory.createRandomLoan(email)) else emptyList()
 
         // 3. 각 레포지토리에 저장
-        accountRepository.saveAll(newAccounts)
-        cardRepository.saveAll(newCards)
-        loanRepository.saveAll(newLoans)
+        val savedAccounts = accountRepository.saveAll(newAccounts)
+        val savedCards = cardRepository.saveAll(newCards)
+        val savedLoans = loanRepository.saveAll(newLoans)
 
-        // 4. 사용자 상태를 '연동완료'로 업데이트
+        // 4. 저장된 자산별로 거래 내역 시뮬레이션 데이터 생성
+        savedAccounts.forEach { transactionService.generateSimulationData(email, it.id!!, AssetType.ACCOUNT) }
+        savedCards.forEach { transactionService.generateSimulationData(email, it.id!!, AssetType.CARD) }
+        savedLoans.forEach { transactionService.generateSimulationData(email, it.id!!, AssetType.LOAN) }
+
+        // 5. 사용자 상태를 '연동완료'로 업데이트
         user.updateStatusToLinked()
         userRepository.save(user)
     }
