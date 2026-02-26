@@ -60,8 +60,7 @@ class User(
     }
 
     // 추가 정보 입력 완료 처리
-    fun completeProfile(name: String?, birthDate: LocalDate, gender: Gender) {
-        name?.let { this.name = it }
+    fun completeProfile(birthDate: LocalDate, gender: Gender) {
         this.birthDate = birthDate
         this.gender = gender
     }

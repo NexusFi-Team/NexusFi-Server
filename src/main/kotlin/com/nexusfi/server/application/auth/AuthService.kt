@@ -8,8 +8,10 @@ import com.nexusfi.server.domain.auth.RefreshToken
 import com.nexusfi.server.domain.auth.repository.RefreshTokenRepository
 import com.nexusfi.server.infrastructure.security.config.JwtProperties
 import com.nexusfi.server.infrastructure.security.jwt.JwtProvider
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.withContext
 import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -41,13 +43,18 @@ class AuthService(
         val socialType = jwtProvider.getSocialType(refreshToken)
 
         // 3. 요청 빈도 제한 확인 (1분당 5회)
-        if (!rateLimiter.isAllowed("reissue:$email", 5, 60)) {
+        val isAllowed = withContext(Dispatchers.IO) {
+            rateLimiter.isAllowed("reissue:$email", 5, 60)
+        }
+        if (!isAllowed) {
             throw BusinessException(ErrorCode.TOO_MANY_REQUESTS)
         }
 
         // 4. Redis에서 기존 토큰 확인 및 검증
-        val savedToken = refreshTokenRepository.findById(email)
-            .orElseThrow { BusinessException(ErrorCode.REFRESH_TOKEN_NOT_FOUND) }
+        val savedToken = withContext(Dispatchers.IO) {
+            refreshTokenRepository.findById(email)
+                .orElseThrow { BusinessException(ErrorCode.REFRESH_TOKEN_NOT_FOUND) }
+        }
 
         if (savedToken.token != refreshToken) {
             throw BusinessException(ErrorCode.INVALID_TOKEN)
@@ -58,14 +65,16 @@ class AuthService(
         val newRefreshToken = jwtProvider.createRefreshToken(email, socialType)
 
         // 6. Redis 정보 갱신
-        refreshTokenRepository.delete(savedToken)
-        refreshTokenRepository.save(
-            RefreshToken(
-                email = email,
-                token = newRefreshToken,
-                expiration = jwtProperties.refreshTokenExpiration / 1000
+        withContext(Dispatchers.IO) {
+            refreshTokenRepository.delete(savedToken)
+            refreshTokenRepository.save(
+                RefreshToken(
+                    email = email,
+                    token = newRefreshToken,
+                    expiration = jwtProperties.refreshTokenExpiration / 1000
+                )
             )
-        )
+        }
 
         Pair(newAccessToken, newRefreshToken)
     }
@@ -75,12 +84,12 @@ class AuthService(
     @Transactional
     suspend fun logout(email: String, accessToken: String) = coroutineScope {
         // 비동기 병렬 처리: 리프레시 토큰 삭제와 블랙리스트 등록 동시 진행
-        val deleteJob = async {
+        val deleteJob = async(Dispatchers.IO) {
             val savedToken = refreshTokenRepository.findById(email).orElse(null)
             savedToken?.let { refreshTokenRepository.delete(it) }
         }
 
-        val blacklistJob = async {
+        val blacklistJob = async(Dispatchers.IO) {
             val remainingTime = jwtProvider.getRemainingExpiration(accessToken)
             if (remainingTime > 0) {
                 redisTemplate.opsForValue().set(
@@ -98,6 +107,6 @@ class AuthService(
 
     // 토큰의 블랙리스트 여부 확인
     fun isBlacklisted(accessToken: String): Boolean {
-        return redisTemplate.hasKey(BLACKLIST_PREFIX + accessToken) ?: false
+        return redisTemplate.hasKey(BLACKLIST_PREFIX + accessToken)
     }
 }

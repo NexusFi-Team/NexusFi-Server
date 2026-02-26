@@ -71,7 +71,6 @@ class UserServiceTest {
             socialId = socialId
         )
         val request = UserProfileRequest(
-            name = "새이름",
             birthDate = LocalDate.of(1995, 1, 1),
             gender = Gender.MALE
         )
@@ -82,7 +81,7 @@ class UserServiceTest {
         userService.completeProfile(email, socialType, request)
 
         // then
-        assertEquals("새이름", user.name)
+        assertEquals("영훈", user.name) // name should remain unchanged
         assertEquals(request.birthDate, user.birthDate)
         assertEquals(request.gender, user.gender)
     }
