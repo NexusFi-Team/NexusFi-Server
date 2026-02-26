@@ -11,7 +11,7 @@ data class AssetResponse(
     val id: Long,
 
     // 자산 종류 (ACCOUNT, CARD, LOAN)
-    @field:Schema(description = "자산 타입")
+    @field:Schema(description = "자산 타입 (ACCOUNT: 계좌, CARD: 카드, LOAN: 대출)")
     val type: AssetType,
 
     // 사용자가 지정한 자산 이름
@@ -22,7 +22,10 @@ data class AssetResponse(
     @field:Schema(description = "금액", example = "1500000")
     val amount: Long,
 
-    // 자산 타입별 상세 정보 (은행명, 카드번호 등)
-    @field:Schema(description = "상세 정보 (Map 형태)", example = "{\"bankName\": \"신한은행\", \"accountNumber\": \"110-123-...\"}")
+    // 자산 타입별 상세 정보
+    @field:Schema(
+        description = "자산 타입별 상세 정보 (Map 형태)", 
+        example = "{\"bankName\": \"신한은행\", \"accountNumber\": \"110-123-...\", \"cardCompany\": \"현대카드\", \"interestRate\": 4.5}"
+    )
     val additionalInfo: Map<String, Any>
 )

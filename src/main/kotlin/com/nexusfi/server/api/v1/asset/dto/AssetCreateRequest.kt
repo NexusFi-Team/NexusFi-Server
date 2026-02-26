@@ -11,7 +11,7 @@ import jakarta.validation.constraints.PositiveOrZero
 data class AssetCreateRequest(
     // 생성할 자산의 타입
     @field:NotNull(message = "자산 타입은 필수입니다.")
-    @field:Schema(description = "자산 타입")
+    @field:Schema(description = "자산 타입 (ACCOUNT, CARD, LOAN)")
     val type: AssetType,
 
     // 자산 이름
@@ -25,6 +25,9 @@ data class AssetCreateRequest(
     val amount: Long,
 
     // 타입별 필수 추가 정보
-    @field:Schema(description = "상세 정보", example = "{\"cardCompany\": \"현대카드\", \"cardNumber\": \"1234-****\"}")
+    @field:Schema(
+        description = "타입별 상세 정보", 
+        example = "{\"cardCompany\": \"현대카드\", \"cardNumber\": \"1234-****\"}"
+    )
     val additionalInfo: Map<String, Any> = emptyMap()
 )
