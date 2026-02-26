@@ -42,6 +42,11 @@ class User(
     @Column
     var ci: String? = null,
 
+    // 사용자 상태
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    var status: UserStatus = UserStatus.ACTIVE,
+
     // 마지막 로그인 일시
     @Column
     var lastLoginAt: LocalDateTime? = null
@@ -68,5 +73,10 @@ class User(
     // 마이데이터 연동 성공 시 CI 저장
     fun linkedMyData(ci: String) {
         this.ci = ci
+    }
+
+    // 자산 연동 완료 시 상태 업데이트
+    fun updateStatusToLinked() {
+        this.status = UserStatus.LINKED
     }
 }

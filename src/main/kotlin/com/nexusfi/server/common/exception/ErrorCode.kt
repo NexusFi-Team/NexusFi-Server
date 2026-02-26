@@ -27,5 +27,8 @@ enum class ErrorCode(
     MALFORMED_TOKEN(HttpStatus.UNAUTHORIZED, "A004", "변조된 토큰입니다."),
     EMPTY_TOKEN(HttpStatus.UNAUTHORIZED, "A005", "토큰 정보가 비어있습니다."),
     REFRESH_TOKEN_NOT_FOUND(HttpStatus.UNAUTHORIZED, "A006", "만료된 세션입니다. 다시 로그인해주세요."),
-    TOO_MANY_REQUESTS(HttpStatus.TOO_MANY_REQUESTS, "A007", "너무 많은 요청이 발생했습니다. 잠시 후 다시 시도해주세요.")
+    TOO_MANY_REQUESTS(HttpStatus.TOO_MANY_REQUESTS, "A007", "너무 많은 요청이 발생했습니다. 잠시 후 다시 시도해주세요."),
+
+    // Asset
+    ASSET_NOT_FOUND(HttpStatus.NOT_FOUND, "S001", "연동된 자산 정보가 없습니다.")
 }
