@@ -3,6 +3,7 @@ package com.nexusfi.server.api.v1.user.dto
 import com.nexusfi.server.domain.user.model.Gender
 import com.nexusfi.server.domain.user.model.SocialType
 import com.nexusfi.server.domain.user.model.User
+import com.nexusfi.server.domain.user.model.UserStatus
 import io.swagger.v3.oas.annotations.media.Schema
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -17,6 +18,9 @@ data class UserResponse(
     
     @field:Schema(description = "소셜 로그인 제공자", example = "KAKAO")
     val socialType: SocialType,
+    
+    @field:Schema(description = "사용자 상태", example = "ACTIVE")
+    val status: UserStatus,
     
     @field:Schema(description = "생년월일 (YYYY-MM-DD)", example = "1997-07-09")
     val birthDate: LocalDate?,
@@ -37,6 +41,7 @@ data class UserResponse(
                 email = user.email,
                 name = user.name,
                 socialType = user.socialType,
+                status = user.status,
                 birthDate = user.birthDate,
                 gender = user.gender,
                 lastLoginAt = user.lastLoginAt,
